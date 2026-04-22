@@ -18,7 +18,6 @@
             line-height: 1.6;
         }
 
-        /* Hero Section */
         .hero {
             background: linear-gradient(135deg, #1e6b3b 0%, #2a9d4e 100%);
             color: white;
@@ -60,7 +59,6 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Navigation */
         .navbar {
             background: white;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
@@ -144,7 +142,6 @@
             background: linear-gradient(90deg, #1e6b3b, #f39c12);
         }
 
-        /* Cards */
         .card-container {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -174,7 +171,6 @@
             margin-bottom: 10px;
         }
 
-        /* About */
         .about-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -208,7 +204,53 @@
             font-weight: bold;
         }
 
-        /* Contact */
+        /* Phần Giúp phát triển web mới */
+        .help-section {
+            background: linear-gradient(135deg, #fef9e7, #fff);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border: 1px solid rgba(243,156,18,0.3);
+        }
+
+        .help-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+
+        .help-section h3 {
+            font-size: 1.8rem;
+            color: #e67e22;
+            margin-bottom: 15px;
+        }
+
+        .help-section p {
+            color: #555;
+            margin-bottom: 25px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .help-btn {
+            display: inline-block;
+            background: linear-gradient(135deg, #1e6b3b, #2a9d4e);
+            color: white;
+            padding: 14px 35px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.1rem;
+            transition: transform 0.3s, box-shadow 0.3s;
+            box-shadow: 0 5px 15px rgba(30,107,59,0.3);
+        }
+
+        .help-btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 8px 25px rgba(30,107,59,0.4);
+        }
+
         .contact-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -243,58 +285,6 @@
             font-style: italic;
         }
 
-        /* Tips Section mới */
-        .tips-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 25px;
-        }
-
-        .tip-card {
-            background: linear-gradient(135deg, #fff9e6, #fff);
-            border-left: 5px solid #f39c12;
-            padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
-            transition: transform 0.3s;
-        }
-
-        .tip-card:hover {
-            transform: translateX(5px);
-        }
-
-        .tip-card h3 {
-            color: #e67e22;
-            margin-bottom: 12px;
-        }
-
-        .tip-code {
-            background: #2c3e50;
-            color: #f1c40f;
-            padding: 8px 12px;
-            border-radius: 8px;
-            font-family: monospace;
-            font-size: 0.8rem;
-            margin-top: 15px;
-            display: inline-block;
-        }
-
-        .btn-link {
-            display: inline-block;
-            background: #1e6b3b;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 30px;
-            text-decoration: none;
-            margin-top: 15px;
-            transition: background 0.3s;
-        }
-
-        .btn-link:hover {
-            background: #f39c12;
-        }
-
-        /* Gallery */
         .gallery-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -319,7 +309,6 @@
             transform: scale(1.02);
         }
 
-        /* Footer */
         .footer {
             background: #1a2a1a;
             color: #aaa;
@@ -360,6 +349,8 @@
             .nav-container { flex-direction: column; }
             .about-grid, .contact-grid { grid-template-columns: 1fr; }
             .section-title { font-size: 1.5rem; }
+            .help-section { padding: 25px; }
+            .help-section h3 { font-size: 1.4rem; }
         }
     </style>
 </head>
@@ -378,7 +369,7 @@
         <ul class="nav-links">
             <li><a href="#home">Trang chủ</a></li>
             <li><a href="#about">Giới thiệu</a></li>
-            <li><a href="#tips">Gợi ý phát triển</a></li>
+            <li><a href="#help">Giúp phát triển</a></li>
             <li><a href="#gallery">Thư viện</a></li>
             <li><a href="#contact">Liên hệ</a></li>
         </ul>
@@ -437,44 +428,14 @@
         </div>
     </section>
 
-    <!-- Tips Section (Mới) -->
-    <section id="tips">
-        <h2 class="section-title">💡 Gợi ý phát triển web</h2>
-        <div class="tips-grid">
-            <div class="tip-card">
-                <h3>📸 Thay ảnh thật</h3>
-                <p>Upload ảnh trường lên GitHub, sửa đường dẫn trong thẻ &lt;img&gt;</p>
-                <code class="tip-code">&lt;img src="anh-truong.jpg"&gt;</code>
-            </div>
-            <div class="tip-card">
-                <h3>🎥 Thêm video giới thiệu</h3>
-                <p>Chèn iframe YouTube vào trang</p>
-                <code class="tip-code">&lt;iframe src="link-youtube"&gt;&lt;/iframe&gt;</code>
-            </div>
-            <div class="tip-card">
-                <h3>📧 Đăng ký nhận tin</h3>
-                <p>Thêm form đăng ký email để gửi thông báo</p>
-                <code class="tip-code">&lt;input type="email" placeholder="Email"&gt;</code>
-            </div>
-            <div class="tip-card">
-                <h3>🏆 Bảng thành tích</h3>
-                <p>Thêm bảng HTML hiển thị giải thưởng của trường</p>
-                <code class="tip-code">&lt;table&gt;...&lt;/table&gt;</code>
-            </div>
-            <div class="tip-card">
-                <h3>🗺️ Bản đồ Google Maps</h3>
-                <p>Chèn iframe Google Maps vào phần liên hệ</p>
-                <code class="tip-code">&lt;iframe src="maps-link"&gt;&lt;/iframe&gt;</code>
-            </div>
-            <div class="tip-card">
-                <h3>🎨 Đổi màu sắc</h3>
-                <p>Tùy chỉnh màu nền, màu chữ trong thẻ style</p>
-                <code class="tip-code">background: #mã_màu;</code>
-            </div>
-        </div>
-        <div style="text-align: center; margin-top: 30px;">
-            <a href="https://www.w3schools.com/html/" target="_blank" class="btn-link">📚 Học thêm HTML tại W3Schools →</a>
-            <a href="https://github.com/MinhTuan-hub2k12" target="_blank" class="btn-link" style="margin-left: 15px; background: #333;">🐙 GitHub của tôi →</a>
+    <!-- Help Section Mới - Thay thế cho Gợi ý phát triển -->
+    <section id="help">
+        <h2 class="section-title">🤝 Giúp chúng tôi phát triển web</h2>
+        <div class="help-section">
+            <div class="help-icon">💻✨</div>
+            <h3>Chung tay xây dựng website trường học hiện đại!</h3>
+            <p>Bạn có ý tưởng hoặc kỹ năng lập trình? Hãy tham gia cùng chúng tôi để nâng cấp trang web này thêm chuyên nghiệp và tiện ích hơn.</p>
+            <a href="goiychungtoi.html" class="help-btn">📝 Gửi góp ý & Phát triển →</a>
         </div>
     </section>
 
@@ -489,7 +450,7 @@
         </div>
     </section>
 
-    <!-- Contact Section (Email & SĐT để Bí mật) -->
+    <!-- Contact Section -->
     <section id="contact">
         <h2 class="section-title">📞 Liên hệ</h2>
         <div class="contact-grid">
@@ -540,7 +501,7 @@
 <footer class="footer">
     <p>🌳 THCS KIM ĐỒNG - Nơi ươm mầm tri thức, chắp cánh ước mơ</p>
     <p>© 2024 - Thiết kế bởi học sinh THCS Kim Đồng</p>
-    <p>💡 Gợi ý: <a href="#tips">Xem các cách nâng cấp web tại đây</a></p>
+    <p>🤝 <a href="goiychungtoi.html">Giúp chúng tôi phát triển web</a> | 📧 Góp ý: <a href="goiychungtoi.html">Tại đây</a></p>
 </footer>
 
 <div class="back-to-top" id="backToTop">↑</div>
