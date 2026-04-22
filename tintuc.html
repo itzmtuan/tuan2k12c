@@ -1,1 +1,820 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tin tức - THCS Kim Đồng</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            color: #2c3e50;
+            overflow-x: hidden;
+        }
+
+        /* Layout chính với Sidebar */
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 260px;
+            background: linear-gradient(180deg, #1a2a1a 0%, #0e1a0e 100%);
+            color: #ecf0f1;
+            transition: width 0.3s ease;
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            z-index: 100;
+            overflow-y: auto;
+            box-shadow: 2px 0 12px rgba(0,0,0,0.1);
+        }
+
+        .sidebar.collapsed {
+            width: 80px;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 20px;
+        }
+
+        .sidebar.collapsed .sidebar-header h3,
+        .sidebar.collapsed .sidebar-header p,
+        .sidebar.collapsed .nav-item span,
+        .sidebar.collapsed .nav-footer span {
+            display: none;
+        }
+
+        .sidebar-header h3 {
+            color: #f39c12;
+            margin-bottom: 5px;
+            font-size: 1.2rem;
+        }
+
+        .sidebar-nav {
+            list-style: none;
+            padding: 0;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 14px 20px;
+            margin: 5px 10px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #ddd;
+            text-decoration: none;
+        }
+
+        .nav-item:hover {
+            background: rgba(255,255,255,0.1);
+            color: white;
+        }
+
+        .nav-item.active {
+            background: #f39c12;
+            color: #1a2a1a;
+            font-weight: bold;
+        }
+
+        .nav-icon {
+            font-size: 1.4rem;
+            min-width: 32px;
+            text-align: center;
+        }
+
+        .nav-footer {
+            position: absolute;
+            bottom: 20px;
+            width: 100%;
+            padding: 15px 20px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            cursor: pointer;
+            text-decoration: none;
+            color: #ddd;
+        }
+
+        /* Nút toggle sidebar */
+        .toggle-btn {
+            position: fixed;
+            left: 270px;
+            top: 20px;
+            background: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 101;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            transition: left 0.3s ease;
+            color: #1e6b3b;
+            font-size: 1.2rem;
+        }
+
+        .toggle-btn.collapsed {
+            left: 90px;
+        }
+
+        /* Main content */
+        .main-content {
+            flex: 1;
+            margin-left: 260px;
+            transition: margin-left 0.3s ease;
+            width: calc(100% - 260px);
+        }
+
+        .main-content.expanded {
+            margin-left: 80px;
+            width: calc(100% - 80px);
+        }
+
+        /* Header trang tin tức */
+        .news-header {
+            background: linear-gradient(135deg, #1e6b3b 0%, #2a9d4e 100%);
+            color: white;
+            padding: 50px 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .news-header::before {
+            content: "📰";
+            position: absolute;
+            font-size: 200px;
+            opacity: 0.08;
+            bottom: -40px;
+            right: -40px;
+            transform: rotate(-10deg);
+            pointer-events: none;
+        }
+
+        .news-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .news-header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        /* Container */
+        .container {
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 40px 30px;
+        }
+
+        /* Layout tin tức 2 cột */
+        .news-layout {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 40px;
+        }
+
+        /* Bài viết chính */
+        .featured-news {
+            background: white;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            margin-bottom: 30px;
+            transition: transform 0.3s;
+        }
+
+        .featured-news:hover {
+            transform: translateY(-5px);
+        }
+
+        .featured-image {
+            background: linear-gradient(135deg, #1e6b3b, #2a9d4e);
+            height: 250px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 5rem;
+        }
+
+        .featured-content {
+            padding: 25px;
+        }
+
+        .featured-category {
+            display: inline-block;
+            background: #f39c12;
+            color: #1a2a1a;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            margin-bottom: 12px;
+        }
+
+        .featured-content h2 {
+            font-size: 1.6rem;
+            color: #1e6b3b;
+            margin-bottom: 12px;
+        }
+
+        .featured-meta {
+            color: #888;
+            font-size: 0.8rem;
+            margin-bottom: 15px;
+            display: flex;
+            gap: 20px;
+        }
+
+        .featured-summary {
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .read-more {
+            color: #1e6b3b;
+            font-weight: bold;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .read-more:hover {
+            color: #f39c12;
+        }
+
+        /* Danh sách bài viết */
+        .news-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .news-item {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            display: flex;
+            gap: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            transition: transform 0.3s;
+        }
+
+        .news-item:hover {
+            transform: translateX(5px);
+        }
+
+        .news-item-image {
+            min-width: 100px;
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+        }
+
+        .news-item-content {
+            flex: 1;
+        }
+
+        .news-item-category {
+            display: inline-block;
+            background: #e74c3c;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 15px;
+            font-size: 0.65rem;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .news-item-content h3 {
+            font-size: 1rem;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+
+        .news-item-content h3 a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .news-item-content h3 a:hover {
+            color: #1e6b3b;
+        }
+
+        .news-date {
+            font-size: 0.7rem;
+            color: #888;
+        }
+
+        /* Sidebar phải */
+        .sidebar-right {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        /* Widget tìm kiếm */
+        .search-widget {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+
+        .search-widget h3 {
+            color: #1e6b3b;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 10px;
+        }
+
+        .search-box input {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            font-family: inherit;
+        }
+
+        .search-box button {
+            background: #1e6b3b;
+            border: none;
+            padding: 0 18px;
+            border-radius: 12px;
+            color: white;
+            cursor: pointer;
+        }
+
+        /* Widget danh mục */
+        .category-widget {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+
+        .category-widget h3 {
+            color: #1e6b3b;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .category-list {
+            list-style: none;
+        }
+
+        .category-list li {
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .category-list li a {
+            text-decoration: none;
+            color: #555;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .category-list li a:hover {
+            color: #1e6b3b;
+        }
+
+        /* Widget bài viết nổi bật */
+        .popular-widget {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+
+        .popular-widget h3 {
+            color: #1e6b3b;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .popular-item {
+            display: flex;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .popular-number {
+            width: 28px;
+            height: 28px;
+            background: #f39c12;
+            color: #1a2a1a;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.8rem;
+        }
+
+        .popular-item h4 {
+            font-size: 0.85rem;
+            flex: 1;
+        }
+
+        .popular-item h4 a {
+            text-decoration: none;
+            color: #2c3e50;
+        }
+
+        .popular-item h4 a:hover {
+            color: #1e6b3b;
+        }
+
+        /* Phân trang */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 40px;
+            flex-wrap: wrap;
+        }
+
+        .page-link {
+            background: white;
+            padding: 10px 16px;
+            border-radius: 10px;
+            text-decoration: none;
+            color: #1e6b3b;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+
+        .page-link:hover, .page-link.active {
+            background: #1e6b3b;
+            color: white;
+        }
+
+        /* Footer */
+        .footer {
+            background: #1a2a1a;
+            color: #aaa;
+            text-align: center;
+            padding: 35px 20px;
+            margin-top: 50px;
+        }
+
+        .footer a {
+            color: #f39c12;
+            text-decoration: none;
+        }
+
+        /* Back to top */
+        .back-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #1e6b3b;
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0;
+            transition: all 0.3s;
+            z-index: 99;
+            border: none;
+        }
+
+        .back-to-top.visible {
+            opacity: 1;
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s;
+            }
+            .sidebar.mobile-open {
+                transform: translateX(0);
+            }
+            .toggle-btn {
+                left: 20px;
+                top: 20px;
+            }
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+            }
+            .news-layout {
+                grid-template-columns: 1fr;
+            }
+            .news-header h1 {
+                font-size: 1.8rem;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .news-item {
+                flex-direction: column;
+            }
+            .news-item-image {
+                width: 100%;
+                height: 120px;
+            }
+            .featured-image {
+                height: 180px;
+                font-size: 3rem;
+            }
+            .featured-content h2 {
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h3>🏫 THCS Kim Đồng</h3>
+            <p>Trường học hạnh phúc</p>
+        </div>
+        <ul class="sidebar-nav">
+            <a href="index.html" class="nav-item">
+                <span class="nav-icon">🏠</span>
+                <span>Trang chủ</span>
+            </a>
+            <a href="tintuc.html" class="nav-item active">
+                <span class="nav-icon">📰</span>
+                <span>Tin tức</span>
+            </a>
+            <a href="index.html#scores" class="nav-item">
+                <span class="nav-icon">📊</span>
+                <span>Tra cứu điểm</span>
+            </a>
+            <a href="index.html#gallery" class="nav-item">
+                <span class="nav-icon">🖼️</span>
+                <span>Thư viện</span>
+            </a>
+            <a href="index.html#contact" class="nav-item">
+                <span class="nav-icon">📞</span>
+                <span>Liên hệ</span>
+            </a>
+        </ul>
+        <a href="goiychungtoi.html" class="nav-footer">
+            <span class="nav-icon">🤝</span>
+            <span>Giúp phát triển web</span>
+        </a>
+    </div>
+
+    <!-- Nút toggle sidebar -->
+    <button class="toggle-btn" id="toggleBtn">☰</button>
+
+    <!-- Main content -->
+    <div class="main-content" id="mainContent">
+        <!-- Header tin tức -->
+        <div class="news-header">
+            <h1>📰 Tin tức - Sự kiện</h1>
+            <p>Cập nhật những hoạt động nổi bật của trường THCS Kim Đồng</p>
+        </div>
+
+        <div class="container">
+            <div class="news-layout">
+                <!-- Cột trái: Bài viết -->
+                <div>
+                    <!-- Bài viết nổi bật -->
+                    <div class="featured-news">
+                        <div class="featured-image">🎓🏆</div>
+                        <div class="featured-content">
+                            <span class="featured-category">🎉 SỰ KIỆN NỔI BẬT</span>
+                            <h2>Lễ khai giảng năm học mới 2024-2025</h2>
+                            <div class="featured-meta">
+                                <span>📅 05/09/2024</span>
+                                <span>👁️ 1.234 lượt xem</span>
+                                <span>✍️ Ban truyền thông</span>
+                            </div>
+                            <p class="featured-summary">Hòa trong không khí vui tươi của ngày hội toàn dân đưa trẻ đến trường, thầy và trò trường THCS Kim Đồng đã long trọng tổ chức lễ khai giảng năm học mới 2024-2025. Buổi lễ diễn ra trong niềm hân hoan, phấn khởi của toàn thể cán bộ, giáo viên và học sinh.</p>
+                            <a href="#" class="read-more">Đọc tiếp →</a>
+                        </div>
+                    </div>
+
+                    <!-- Danh sách bài viết -->
+                    <div class="news-list" id="newsList">
+                        <!-- Bài viết 1 -->
+                        <div class="news-item">
+                            <div class="news-item-image">🏅</div>
+                            <div class="news-item-content">
+                                <span class="news-item-category">THÀNH TÍCH</span>
+                                <h3><a href="#">Học sinh đạt giải Nhất cuộc thi Khoa học kỹ thuật cấp tỉnh</a></h3>
+                                <div class="news-date">📅 15/04/2024 | 👁️ 856 lượt xem</div>
+                            </div>
+                        </div>
+                        <div class="news-item">
+                            <div class="news-item-image">⚽</div>
+                            <div class="news-item-content">
+                                <span class="news-item-category">HOẠT ĐỘNG</span>
+                                <h3><a href="#">Hội thao truyền thống chào mừng 26/3 thành công rực rỡ</a></h3>
+                                <div class="news-date">📅 28/03/2024 | 👁️ 1.245 lượt xem</div>
+                            </div>
+                        </div>
+                        <div class="news-item">
+                            <div class="news-item-image">🌿</div>
+                            <div class="news-item-content">
+                                <span class="news-item-category">MÔI TRƯỜNG</span>
+                                <h3><a href="#">Hưởng ứng Ngày Trái Đất: Trồng cây xanh trong khuôn viên trường</a></h3>
+                                <div class="news-date">📅 22/04/2024 | 👁️ 432 lượt xem</div>
+                            </div>
+                        </div>
+                        <div class="news-item">
+                            <div class="news-item-image">📚</div>
+                            <div class="news-item-content">
+                                <span class="news-item-category">VĂN HÓA</span>
+                                <h3><a href="#">Tuần lễ hưởng ứng học tập suốt đời: Sôi nổi các hoạt động thư viện</a></h3>
+                                <div class="news-date">📅 08/10/2024 | 👁️ 367 lượt xem</div>
+                            </div>
+                        </div>
+                        <div class="news-item">
+                            <div class="news-item-image">🤝</div>
+                            <div class="news-item-content">
+                                <span class="news-item-category">TỪ THIỆN</span>
+                                <h3><a href="#">Trao quà Tết cho học sinh có hoàn cảnh khó khăn</a></h3>
+                                <div class="news-date">📅 25/01/2024 | 👁️ 678 lượt xem</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Phân trang -->
+                    <div class="pagination">
+                        <a href="#" class="page-link active">1</a>
+                        <a href="#" class="page-link">2</a>
+                        <a href="#" class="page-link">3</a>
+                        <a href="#" class="page-link">→</a>
+                    </div>
+                </div>
+
+                <!-- Cột phải: Sidebar -->
+                <div class="sidebar-right">
+                    <!-- Tìm kiếm -->
+                    <div class="search-widget">
+                        <h3>🔍 Tìm kiếm tin tức</h3>
+                        <div class="search-box">
+                            <input type="text" placeholder="Nhập từ khóa..." id="searchInput">
+                            <button id="searchBtn">🔍</button>
+                        </div>
+                    </div>
+
+                    <!-- Danh mục -->
+                    <div class="category-widget">
+                        <h3>📂 Danh mục</h3>
+                        <ul class="category-list">
+                            <li><a href="#">🎉 Sự kiện nổi bật <span>(12)</span></a></li>
+                            <li><a href="#">🏅 Thành tích học sinh <span>(8)</span></a></li>
+                            <li><a href="#">⚽ Hoạt động ngoại khóa <span>(15)</span></a></li>
+                            <li><a href="#">📢 Thông báo nhà trường <span>(6)</span></a></li>
+                            <li><a href="#">🌿 Góc môi trường <span>(5)</span></a></li>
+                        </ul>
+                    </div>
+
+                    <!-- Bài viết xem nhiều -->
+                    <div class="popular-widget">
+                        <h3>🔥 Bài viết xem nhiều</h3>
+                        <div class="popular-item">
+                            <div class="popular-number">1</div>
+                            <h4><a href="#">Lễ khai giảng năm học mới 2024-2025</a></h4>
+                        </div>
+                        <div class="popular-item">
+                            <div class="popular-number">2</div>
+                            <h4><a href="#">Học sinh đạt giải Nhất cuộc thi Khoa học kỹ thuật</a></h4>
+                        </div>
+                        <div class="popular-item">
+                            <div class="popular-number">3</div>
+                            <h4><a href="#">Hội thao truyền thống chào mừng 26/3</a></h4>
+                        </div>
+                        <div class="popular-item">
+                            <div class="popular-number">4</div>
+                            <h4><a href="#">Thông báo tuyển sinh lớp 6 năm học 2025-2026</a></h4>
+                        </div>
+                        <div class="popular-item">
+                            <div class="popular-number">5</div>
+                            <h4><a href="#">Trao quà Tết cho học sinh khó khăn</a></h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="footer">
+            <p>🌳 THCS KIM ĐỒNG - Nơi ươm mầm tri thức, chắp cánh ước mơ</p>
+            <p>© 2025 - Thiết kế bởi học sinh THCS Kim Đồng</p>
+            <p>🤝 <a href="goiychungtoi.html">Giúp chúng tôi phát triển web</a></p>
+        </footer>
+    </div>
+</div>
+
+<button class="back-to-top" id="backToTop">↑</button>
+
+<script>
+    // Sidebar toggle
+    const sidebar = document.getElementById('sidebar');
+    const toggleBtn = document.getElementById('toggleBtn');
+    const mainContent = document.getElementById('mainContent');
+    const backToTop = document.getElementById('backToTop');
+    let isMobile = window.innerWidth <= 992;
+    let sidebarCollapsed = false;
+
+    function toggleSidebar() {
+        if (isMobile) {
+            sidebar.classList.toggle('mobile-open');
+        } else {
+            sidebarCollapsed = !sidebarCollapsed;
+            sidebar.classList.toggle('collapsed', sidebarCollapsed);
+            mainContent.classList.toggle('expanded', sidebarCollapsed);
+            toggleBtn.classList.toggle('collapsed', sidebarCollapsed);
+        }
+    }
+
+    function handleResize() {
+        isMobile = window.innerWidth <= 992;
+        if (!isMobile) {
+            sidebar.classList.remove('mobile-open');
+            if (sidebarCollapsed) {
+                sidebar.classList.add('collapsed');
+                mainContent.classList.add('expanded');
+                toggleBtn.classList.add('collapsed');
+            } else {
+                sidebar.classList.remove('collapsed');
+                mainContent.classList.remove('expanded');
+                toggleBtn.classList.remove('collapsed');
+            }
+        } else {
+            sidebar.classList.remove('collapsed');
+            mainContent.classList.remove('expanded');
+            toggleBtn.classList.remove('collapsed');
+        }
+    }
+
+    toggleBtn.addEventListener('click', toggleSidebar);
+    window.addEventListener('resize', handleResize);
+    handleResize();
+
+    // Back to top
+    window.addEventListener('scroll', () => {
+        backToTop.classList.toggle('visible', window.scrollY > 300);
+    });
+    backToTop.addEventListener('click', () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    // Tìm kiếm đơn giản
+    const searchBtn = document.getElementById('searchBtn');
+    const searchInput = document.getElementById('searchInput');
+    
+    searchBtn.addEventListener('click', () => {
+        const keyword = searchInput.value.trim().toLowerCase();
+        if (keyword === '') {
+            alert('Vui lòng nhập từ khóa tìm kiếm!');
+            return;
+        }
+        alert(`🔍 Tìm kiếm: "${keyword}"\n(Tính năng đang phát triển, sẽ sớm ra mắt!)`);
+    });
+    
+    searchInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') searchBtn.click();
+    });
+</script>
+</body>
+</html>
