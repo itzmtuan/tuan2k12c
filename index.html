@@ -237,14 +237,13 @@
         camera.position.set(3, 2, 5);
         camera.lookAt(0, 0, 0);
 
-        // Renderer với pixel ratio cao nhất có thể
         const renderer = new THREE.WebGLRenderer({
             antialias: true,
             alpha: false,
             powerPreference: "high-performance"
         });
         renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // Giữ nguyên để lag
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         renderer.setClearColor(0x0a0a0f, 1);
         container.appendChild(renderer.domElement);
 
@@ -277,7 +276,7 @@
         `;
 
         // ============================================================
-        // SHADER CỰC NẶNG - TẤT CẢ MỌI THỨ LAG NHẤT
+        // SHADER CỰC NẶNG - ĐÃ SỬA LỖI
         // ============================================================
         const fragmentShader = `
             precision highp float;
@@ -293,7 +292,7 @@
             uniform vec2  uMouse;
             uniform float uFrame;
 
-            // ---- NOISE HÀM NẶNG NHẤT ----
+            // ---- NOISE HÀM ----
             float hash(vec3 p) {
                 p = fract(p * 0.3183099 + 0.1);
                 p *= 17.0;
@@ -306,13 +305,19 @@
                 return fract(p.x * p.y * 1.732);
             }
 
-            float hash12(vec2 p) {
-                p = fract(p * vec2(123.456, 789.012));
-                p += dot(p, p + 45.67);
-                return fract(p.x * p.y * 2.718);
+            // NOISE 2D - ĐÃ THÊM VÀO
+            float noise2D(vec2 p) {
+                vec2 i = floor(p);
+                vec2 f = fract(p);
+                f = f * f * (3.0 - 2.0 * f);
+                float a = hash21(i);
+                float b = hash21(i + vec2(1.0, 0.0));
+                float c = hash21(i + vec2(0.0, 1.0));
+                float d = hash21(i + vec2(1.0, 1.0));
+                return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
             }
 
-            // Noise 3D với nhiều phép toán
+            // Noise 3D
             float noise3D(vec3 p) {
                 vec3 i = floor(p);
                 vec3 f = fract(p);
@@ -332,7 +337,7 @@
                 return mix(mix1, mix2, f.z);
             }
 
-            // Noise 4D (cực nặng)
+            // Noise 4D
             float noise4D(vec4 p) {
                 vec4 i = floor(p);
                 vec4 f = fract(p);
@@ -352,7 +357,7 @@
                 return mix(mix1, mix2, f.z);
             }
 
-            // FBM 10 OCTAVES (RẤT NẶNG)
+            // FBM 10 OCTAVES
             float fbm10(vec3 p) {
                 float value = 0.0;
                 float amp = 0.5;
@@ -365,7 +370,7 @@
                 return value;
             }
 
-            // FBM 8 OCTAVES với 4D (cực nặng)
+            // FBM 8 OCTAVES 4D
             float fbm8_4d(vec4 p) {
                 float value = 0.0;
                 float amp = 0.5;
@@ -378,7 +383,7 @@
                 return value;
             }
 
-            // Domain Warp 3 lớp (cực cực nặng)
+            // Domain Warp 3 lớp
             float domainWarpHeavy(vec3 p) {
                 float t = uTime * 0.05;
                 vec3 q = vec3(
@@ -411,7 +416,7 @@
                 p.x += time * 0.03 + sin(time * 0.08) * 0.2;
                 p.y += time * 0.05 + cos(time * 0.06) * 0.2;
 
-                // LẤY NHIỀU LỚP NOISE (CỰC NẶNG)
+                // LẤY NHIỀU LỚP NOISE
                 float n1 = domainWarpHeavy(p);
                 float n2 = fbm10(p * 1.7 + vec3(time * 0.06, time * 0.04, time * 0.02));
                 float n3 = fbm8_4d(vec4(p * 2.3, time * 0.03));
@@ -419,35 +424,31 @@
                 float n5 = noise3D(p * 5.0 + vec3(time * 0.12, time * 0.10, time * 0.08));
                 float n6 = noise4D(vec4(p * 4.0, time * 0.06));
 
-                // Kết hợp TẤT CẢ
                 float n = (n1 * 0.4 + n2 * 0.2 + n3 * 0.15 + n4 * 0.1 + n5 * 0.05 + n6 * 0.1);
 
-                // Thêm noise 2D nhiều lớp
+                // Noise 2D nhiều lớp
                 vec2 p2d = uv * 20.0 + vec2(time * 0.03, time * 0.02);
                 float n2d1 = noise2D(p2d);
                 float n2d2 = noise2D(p2d * 2.0 + vec2(time * 0.05));
                 float n2d3 = noise2D(p2d * 3.0 + vec2(time * 0.07));
                 n += (n2d1 + n2d2 + n2d3) * 0.03;
 
-                // Áp dụng density (rất nặng với pow)
                 float density = uDensity;
                 float shape = 1.0 - abs(n - 0.5) * 2.0;
                 shape = pow(shape, density * 1.5);
                 shape = pow(shape, 1.2);
 
-                // Hiệu ứng chuột phức tạp
                 float mouseDist = distance(uv, uMouse);
                 float mouseInfluence = 0.2 + 0.8 * (1.0 - mouseDist * 1.8);
                 mouseInfluence = pow(mouseInfluence, 0.6);
                 shape *= mouseInfluence;
 
-                // Sóng nhiều lớp (nặng)
                 float wave1 = sin(uv.x * 40.0 + time * 0.8) * cos(uv.y * 40.0 + time * 0.7);
                 float wave2 = sin(uv.x * 60.0 + time * 1.2) * cos(uv.y * 60.0 + time * 1.0);
                 float wave3 = sin((uv.x + uv.y) * 50.0 + time * 1.5);
                 shape += (wave1 + wave2 + wave3) * 0.02;
 
-                // ---- MÀU SẮC RẤT PHỨC TẠP ----
+                // ---- MÀU SẮC ----
                 vec3 colors[8];
                 colors[0] = vec3(0.05, 0.02, 0.15);
                 colors[1] = vec3(0.9, 0.1, 0.7);
@@ -466,7 +467,6 @@
                     col = mix(col, colors[i + 1], t);
                 }
 
-                // Thêm biến đổi màu phức tạp
                 vec3 hueShift = vec3(
                     sin(time * 0.02 + n * 2.0) * 0.1,
                     cos(time * 0.025 + n * 1.5) * 0.1,
@@ -477,7 +477,6 @@
                 float intensity = uIntensity;
                 col *= shape * intensity * 1.5;
 
-                // Glow nhiều lớp
                 float distToCenter = distance(uv, vec2(0.5, 0.5));
                 float glow1 = exp(-distToCenter * 2.0) * 0.6;
                 float glow2 = exp(-distToCenter * 4.5) * 0.4;
@@ -488,24 +487,20 @@
                 col += vec3(0.1, 0.5, 0.9) * glow3 * intensity;
                 col += vec3(0.8, 0.2, 0.3) * glow4 * intensity;
 
-                // Highlight nhiều lớp
                 float highlight1 = pow(shape, 6.0) * 1.0;
                 float highlight2 = pow(shape, 10.0) * 0.6;
                 col += vec3(1.0, 0.95, 1.0) * highlight1 * intensity;
                 col += vec3(1.0, 0.8, 0.6) * highlight2 * intensity;
 
-                // Hiệu ứng hạt (nặng)
                 vec2 grainUV = uv * 600.0 + vec2(time * 0.02, time * 0.015);
                 float grain1 = hash21(grainUV);
                 float grain2 = hash21(grainUV * 1.5 + 10.0);
                 col += (grain1 - 0.5) * 0.04 * intensity;
                 col += (grain2 - 0.5) * 0.02 * intensity;
 
-                // Vignette mạnh
                 float vignette = 1.0 - distToCenter * 0.7;
                 col *= vignette;
 
-                // Nhiễu màu
                 float colorNoise1 = hash21(uv * 400.0 + time * 0.02);
                 float colorNoise2 = hash21(uv * 500.0 + time * 0.015);
                 col += (colorNoise1 - 0.5) * 0.03;
