@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>🌀 Volume Shader NẶNG (Lag)</title>
+    <title>💀 Volume Shader - Hủy diệt GPU</title>
     <style>
         * {
             margin: 0;
@@ -34,7 +34,7 @@
             left: 50%;
             transform: translateX(-50%);
             z-index: 10;
-            background: rgba(0, 0, 0, 0.75);
+            background: rgba(0, 0, 0, 0.85);
             backdrop-filter: blur(20px);
             border-radius: 60px;
             padding: 1rem 2rem;
@@ -68,7 +68,7 @@
             appearance: none;
             width: 140px;
             height: 4px;
-            background: linear-gradient(90deg, #3b82f6, #a78bfa);
+            background: linear-gradient(90deg, #ff4444, #ff8800);
             border-radius: 10px;
             outline: none;
             transition: 0.2s;
@@ -78,25 +78,25 @@
         .control-group input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none;
             appearance: none;
-            width: 16px;
-            height: 16px;
+            width: 18px;
+            height: 18px;
             border-radius: 50%;
-            background: radial-gradient(circle at 30% 30%, #a78bfa, #7c3aed);
-            border: 2px solid rgba(255, 255, 255, 0.2);
+            background: radial-gradient(circle at 30% 30%, #ff4444, #cc0000);
+            border: 2px solid rgba(255, 100, 100, 0.3);
             cursor: pointer;
-            box-shadow: 0 0 20px rgba(167, 139, 250, 0.3);
+            box-shadow: 0 0 30px rgba(255, 0, 0, 0.5);
             transition: 0.15s;
         }
 
         .control-group input[type="range"]::-webkit-slider-thumb:hover {
-            transform: scale(1.15);
-            border-color: rgba(255, 255, 255, 0.5);
+            transform: scale(1.2);
+            border-color: rgba(255, 100, 100, 0.8);
         }
 
         .control-group .value-display {
             font-size: 0.85rem;
             font-weight: 700;
-            color: #e2e8f0;
+            color: #ff6666;
             min-width: 32px;
             text-align: center;
             font-variant-numeric: tabular-nums;
@@ -107,11 +107,16 @@
             top: 16px;
             right: 20px;
             z-index: 10;
-            color: rgba(255, 255, 255, 0.15);
-            font-size: 0.7rem;
+            color: #ff3333;
+            font-size: 0.9rem;
             font-family: monospace;
             pointer-events: none;
             letter-spacing: 0.5px;
+            background: rgba(0,0,0,0.7);
+            padding: 0.3rem 1rem;
+            border-radius: 10px;
+            border: 1px solid rgba(255,0,0,0.2);
+            font-weight: 700;
         }
 
         .lag-indicator {
@@ -120,26 +125,35 @@
             left: 20px;
             z-index: 10;
             color: #ff6b6b;
-            font-size: 0.8rem;
+            font-size: 0.9rem;
             font-weight: 700;
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(0, 0, 0, 0.7);
             padding: 0.3rem 1rem;
-            border-radius: 20px;
-            border: 1px solid rgba(255, 100, 100, 0.2);
-            animation: pulseLag 1s ease-in-out infinite;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 100, 100, 0.3);
+            animation: pulseLag 0.8s ease-in-out infinite;
             pointer-events: none;
         }
 
         @keyframes pulseLag {
-            0%,
-            100% {
-                opacity: 0.6;
-                transform: scale(1);
-            }
-            50% {
-                opacity: 1;
-                transform: scale(1.05);
-            }
+            0%, 100% { opacity: 0.5; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.05); }
+        }
+
+        .warning {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+            color: #ff8844;
+            font-size: 0.7rem;
+            background: rgba(0,0,0,0.5);
+            padding: 0.2rem 1.5rem;
+            border-radius: 20px;
+            border: 1px solid rgba(255,100,0,0.2);
+            pointer-events: none;
+            white-space: nowrap;
         }
 
         @media (max-width: 700px) {
@@ -151,17 +165,10 @@
                 min-width: unset;
                 width: calc(100% - 32px);
             }
-            .control-group input[type="range"] {
-                width: 80px;
-            }
-            .control-group label {
-                font-size: 0.65rem;
-                min-width: 36px;
-            }
-            .control-group .value-display {
-                font-size: 0.75rem;
-                min-width: 24px;
-            }
+            .control-group input[type="range"] { width: 80px; }
+            .control-group label { font-size: 0.65rem; min-width: 36px; }
+            .control-group .value-display { font-size: 0.75rem; min-width: 24px; }
+            .warning { display: none; }
         }
 
         @media (max-width: 450px) {
@@ -172,14 +179,8 @@
                 border-radius: 30px;
                 bottom: 12px;
             }
-            .control-group {
-                width: 100%;
-                justify-content: space-between;
-            }
-            .control-group input[type="range"] {
-                flex: 1;
-                width: unset;
-            }
+            .control-group { width: 100%; justify-content: space-between; }
+            .control-group input[type="range"] { flex: 1; width: unset; }
         }
     </style>
 </head>
@@ -187,24 +188,25 @@
 
     <div id="canvas-container"></div>
 
-    <div class="lag-indicator">🔥 LAG MODE (Nặng)</div>
+    <div class="lag-indicator">💀 LAG MODE - Hủy diệt GPU</div>
     <div class="fps-counter" id="fpsCounter">-- FPS</div>
+    <div class="warning">⚠️ CẢNH BÁO: Trang này sẽ làm máy bạn lag nặng!</div>
 
     <div class="control-panel" id="controls">
         <div class="control-group">
-            <label>🌀 Nặng</label>
-            <input type="range" id="densitySlider" min="0.5" max="5.0" step="0.1" value="2.5" />
-            <span class="value-display" id="densityValue">2.50</span>
+            <label>🔥 Nặng</label>
+            <input type="range" id="densitySlider" min="1.0" max="8.0" step="0.1" value="4.0" />
+            <span class="value-display" id="densityValue">4.0</span>
         </div>
         <div class="control-group">
-            <label>⚡ Xoay</label>
-            <input type="range" id="speedSlider" min="0.0" max="0.5" step="0.01" value="0.15" />
-            <span class="value-display" id="speedValue">0.15</span>
+            <label>🌀 Xoay</label>
+            <input type="range" id="speedSlider" min="0.0" max="2.0" step="0.05" value="0.8" />
+            <span class="value-display" id="speedValue">0.80</span>
         </div>
         <div class="control-group">
-            <label>💡 Sáng</label>
-            <input type="range" id="intensitySlider" min="0.2" max="3.0" step="0.1" value="1.5" />
-            <span class="value-display" id="intensityValue">1.50</span>
+            <label>💀 Sáng</label>
+            <input type="range" id="intensitySlider" min="0.5" max="4.0" step="0.1" value="2.0" />
+            <span class="value-display" id="intensityValue">2.0</span>
         </div>
     </div>
 
@@ -235,13 +237,14 @@
         camera.position.set(3, 2, 5);
         camera.lookAt(0, 0, 0);
 
+        // Renderer với pixel ratio cao nhất có thể
         const renderer = new THREE.WebGLRenderer({
             antialias: true,
             alpha: false,
             powerPreference: "high-performance"
         });
         renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // Giữ nguyên để lag
         renderer.setClearColor(0x0a0a0f, 1);
         container.appendChild(renderer.domElement);
 
@@ -263,211 +266,255 @@
         };
 
         const vertexShader = `
-                    varying vec3 vPosition;
-                    varying vec2 vUv;
-                    void main() {
-                        vUv = uv;
-                        vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
-                        vPosition = mvPosition.xyz;
-                        gl_Position = projectionMatrix * mvPosition;
-                    }
-                `;
+            varying vec3 vPosition;
+            varying vec2 vUv;
+            void main() {
+                vUv = uv;
+                vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+                vPosition = mvPosition.xyz;
+                gl_Position = projectionMatrix * mvPosition;
+            }
+        `;
 
         // ============================================================
-        // SHADER SIÊU NẶNG - NHIỀU OCTAVES + NHIỀU PHÉP TOÁN
+        // SHADER CỰC NẶNG - TẤT CẢ MỌI THỨ LAG NHẤT
         // ============================================================
         const fragmentShader = `
-                    precision highp float;
+            precision highp float;
 
-                    varying vec3 vPosition;
-                    varying vec2 vUv;
+            varying vec3 vPosition;
+            varying vec2 vUv;
 
-                    uniform float uTime;
-                    uniform float uDensity;
-                    uniform float uSpeed;
-                    uniform float uIntensity;
-                    uniform vec2  uResolution;
-                    uniform vec2  uMouse;
-                    uniform float uFrame;
+            uniform float uTime;
+            uniform float uDensity;
+            uniform float uSpeed;
+            uniform float uIntensity;
+            uniform vec2  uResolution;
+            uniform vec2  uMouse;
+            uniform float uFrame;
 
-                    // ---- NOISE HÀM NẶNG (nhiều phép toán) ----
-                    float hash(vec3 p) {
-                        p = fract(p * 0.3183099 + 0.1);
-                        p *= 17.0;
-                        return fract(p.x * p.y * p.z * (p.x + p.y + p.z + 0.5));
-                    }
+            // ---- NOISE HÀM NẶNG NHẤT ----
+            float hash(vec3 p) {
+                p = fract(p * 0.3183099 + 0.1);
+                p *= 17.0;
+                return fract(p.x * p.y * p.z * (p.x + p.y + p.z + 0.5) * 1.618);
+            }
 
-                    float hash21(vec2 p) {
-                        p = fract(p * vec2(234.34, 435.345));
-                        p += dot(p, p + 19.19);
-                        return fract(p.x * p.y);
-                    }
+            float hash21(vec2 p) {
+                p = fract(p * vec2(234.34, 435.345));
+                p += dot(p, p + 19.19);
+                return fract(p.x * p.y * 1.732);
+            }
 
-                    // Noise 3D với nhiều phép toán hơn
-                    float noise3D(vec3 p) {
-                        vec3 i = floor(p);
-                        vec3 f = fract(p);
-                        f = f * f * (3.0 - 2.0 * f);
+            float hash12(vec2 p) {
+                p = fract(p * vec2(123.456, 789.012));
+                p += dot(p, p + 45.67);
+                return fract(p.x * p.y * 2.718);
+            }
 
-                        float a = hash(i + vec3(0.0, 0.0, 0.0));
-                        float b = hash(i + vec3(1.0, 0.0, 0.0));
-                        float c = hash(i + vec3(0.0, 1.0, 0.0));
-                        float d = hash(i + vec3(1.0, 1.0, 0.0));
-                        float e = hash(i + vec3(0.0, 0.0, 1.0));
-                        float f_ = hash(i + vec3(1.0, 0.0, 1.0));
-                        float g = hash(i + vec3(0.0, 1.0, 1.0));
-                        float h = hash(i + vec3(1.0, 1.0, 1.0));
+            // Noise 3D với nhiều phép toán
+            float noise3D(vec3 p) {
+                vec3 i = floor(p);
+                vec3 f = fract(p);
+                f = f * f * (3.0 - 2.0 * f);
 
-                        float mix1 = mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
-                        float mix2 = mix(mix(e, f_, f.x), mix(g, h, f.x), f.y);
-                        return mix(mix1, mix2, f.z);
-                    }
+                float a = hash(i + vec3(0.0, 0.0, 0.0));
+                float b = hash(i + vec3(1.0, 0.0, 0.0));
+                float c = hash(i + vec3(0.0, 1.0, 0.0));
+                float d = hash(i + vec3(1.0, 1.0, 0.0));
+                float e = hash(i + vec3(0.0, 0.0, 1.0));
+                float f_ = hash(i + vec3(1.0, 0.0, 1.0));
+                float g = hash(i + vec3(0.0, 1.0, 1.0));
+                float h = hash(i + vec3(1.0, 1.0, 1.0));
 
-                    // Noise 2D cho lớp phụ
-                    float noise2D(vec2 p) {
-                        vec2 i = floor(p);
-                        vec2 f = fract(p);
-                        f = f * f * (3.0 - 2.0 * f);
-                        float a = hash21(i);
-                        float b = hash21(i + vec2(1.0, 0.0));
-                        float c = hash21(i + vec2(0.0, 1.0));
-                        float d = hash21(i + vec2(1.0, 1.0));
-                        return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
-                    }
+                float mix1 = mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
+                float mix2 = mix(mix(e, f_, f.x), mix(g, h, f.x), f.y);
+                return mix(mix1, mix2, f.z);
+            }
 
-                    // FBM - 8 OCTAVES (rất nặng)
-                    float fbm8(vec3 p) {
-                        float value = 0.0;
-                        float amp = 0.5;
-                        float freq = 1.0;
-                        for (int i = 0; i < 8; i++) {
-                            value += amp * noise3D(p * freq);
-                            freq *= 2.1;
-                            amp *= 0.48;
-                        }
-                        return value;
-                    }
+            // Noise 4D (cực nặng)
+            float noise4D(vec4 p) {
+                vec4 i = floor(p);
+                vec4 f = fract(p);
+                f = f * f * (3.0 - 2.0 * f);
+                
+                float a = hash(vec3(i.x, i.y, i.z + i.w * 0.1));
+                float b = hash(vec3(i.x + 1.0, i.y, i.z + i.w * 0.1));
+                float c = hash(vec3(i.x, i.y + 1.0, i.z + i.w * 0.1));
+                float d = hash(vec3(i.x + 1.0, i.y + 1.0, i.z + i.w * 0.1));
+                float e = hash(vec3(i.x, i.y, i.z + 1.0 + i.w * 0.1));
+                float f_ = hash(vec3(i.x + 1.0, i.y, i.z + 1.0 + i.w * 0.1));
+                float g = hash(vec3(i.x, i.y + 1.0, i.z + 1.0 + i.w * 0.1));
+                float h_ = hash(vec3(i.x + 1.0, i.y + 1.0, i.z + 1.0 + i.w * 0.1));
+                
+                float mix1 = mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
+                float mix2 = mix(mix(e, f_, f.x), mix(g, h_, f.x), f.y);
+                return mix(mix1, mix2, f.z);
+            }
 
-                    // FBM thứ 2 với số octaves khác (thêm nặng)
-                    float fbm6(vec3 p) {
-                        float value = 0.0;
-                        float amp = 0.5;
-                        float freq = 0.8;
-                        for (int i = 0; i < 6; i++) {
-                            value += amp * noise3D(p * freq + 1.7);
-                            freq *= 2.3;
-                            amp *= 0.45;
-                        }
-                        return value;
-                    }
+            // FBM 10 OCTAVES (RẤT NẶNG)
+            float fbm10(vec3 p) {
+                float value = 0.0;
+                float amp = 0.5;
+                float freq = 1.0;
+                for (int i = 0; i < 10; i++) {
+                    value += amp * noise3D(p * freq);
+                    freq *= 2.1;
+                    amp *= 0.48;
+                }
+                return value;
+            }
 
-                    // Domain Warp (làm méo noise, rất nặng)
-                    float domainWarp(vec3 p) {
-                        vec3 q = vec3(
-                            fbm8(p + vec3(0.0, 0.0, 0.0)),
-                            fbm8(p + vec3(5.2, 1.3, 2.8)),
-                            fbm8(p + vec3(1.7, 9.2, 3.4))
-                        );
-                        vec3 r = vec3(
-                            fbm8(p + 4.0 * q + vec3(1.7, 9.2, 0.0) + 0.15 * uTime),
-                            fbm8(p + 4.0 * q + vec3(8.3, 2.8, 0.0) + 0.12 * uTime),
-                            fbm8(p + 4.0 * q + vec3(3.1, 6.5, 0.0) + 0.10 * uTime)
-                        );
-                        return fbm8(p + 2.0 * r);
-                    }
+            // FBM 8 OCTAVES với 4D (cực nặng)
+            float fbm8_4d(vec4 p) {
+                float value = 0.0;
+                float amp = 0.5;
+                float freq = 1.0;
+                for (int i = 0; i < 8; i++) {
+                    value += amp * noise4D(p * freq);
+                    freq *= 2.2;
+                    amp *= 0.46;
+                }
+                return value;
+            }
 
-                    void main() {
-                        vec2 uv = vUv;
-                        float time = uTime * uSpeed;
+            // Domain Warp 3 lớp (cực cực nặng)
+            float domainWarpHeavy(vec3 p) {
+                float t = uTime * 0.05;
+                vec3 q = vec3(
+                    fbm10(p + vec3(0.0, 0.0, 0.0) + t),
+                    fbm10(p + vec3(5.2, 1.3, 2.8) + t * 1.1),
+                    fbm10(p + vec3(1.7, 9.2, 3.4) + t * 0.9)
+                );
+                vec3 r = vec3(
+                    fbm10(p + 4.0 * q + vec3(1.7, 9.2, 0.0) + t * 0.8),
+                    fbm10(p + 4.0 * q + vec3(8.3, 2.8, 0.0) + t * 0.7),
+                    fbm10(p + 4.0 * q + vec3(3.1, 6.5, 0.0) + t * 0.6)
+                );
+                vec3 s = vec3(
+                    fbm10(p + 2.0 * r + vec3(0.5, 0.5, 0.5) + t * 0.5),
+                    fbm10(p + 2.0 * r + vec3(1.5, 2.5, 3.5) + t * 0.4),
+                    fbm10(p + 2.0 * r + vec3(4.5, 6.5, 8.5) + t * 0.3)
+                );
+                return fbm10(p + 1.5 * s);
+            }
 
-                        // Tạo 3D position
-                        vec3 pos = vec3(uv * 2.0 - 1.0, 0.0);
-                        float depth = vPosition.z * 0.8 + 0.5;
+            void main() {
+                vec2 uv = vUv;
+                float time = uTime * uSpeed;
 
-                        // Scale và xoay
-                        vec3 p = pos * 2.8;
-                        p.z += time * 0.12;
-                        p.x += time * 0.04 + sin(time * 0.1) * 0.1;
-                        p.y += time * 0.06 + cos(time * 0.08) * 0.1;
+                vec3 pos = vec3(uv * 2.0 - 1.0, 0.0);
+                float depth = vPosition.z * 0.8 + 0.5;
 
-                        // ---- LẤY NHIỀU LỚP NOISE (NẶNG) ----
-                        float n1 = domainWarp(p);
-                        float n2 = fbm8(p * 1.7 + vec3(time * 0.07, time * 0.05, time * 0.03));
-                        float n3 = fbm6(p * 2.3 + vec3(time * 0.09, time * 0.11, time * 0.07));
-                        float n4 = noise3D(p * 4.0 + vec3(time * 0.15, time * 0.12, time * 0.09));
+                vec3 p = pos * 3.0;
+                p.z += time * 0.1;
+                p.x += time * 0.03 + sin(time * 0.08) * 0.2;
+                p.y += time * 0.05 + cos(time * 0.06) * 0.2;
 
-                        // Kết hợp nhiều lớp
-                        float n = (n1 * 0.6 + n2 * 0.25 + n3 * 0.1 + n4 * 0.05);
+                // LẤY NHIỀU LỚP NOISE (CỰC NẶNG)
+                float n1 = domainWarpHeavy(p);
+                float n2 = fbm10(p * 1.7 + vec3(time * 0.06, time * 0.04, time * 0.02));
+                float n3 = fbm8_4d(vec4(p * 2.3, time * 0.03));
+                float n4 = fbm10(p * 3.1 + vec3(time * 0.08, time * 0.07, time * 0.05));
+                float n5 = noise3D(p * 5.0 + vec3(time * 0.12, time * 0.10, time * 0.08));
+                float n6 = noise4D(vec4(p * 4.0, time * 0.06));
 
-                        // Thêm noise 2D cho chi tiết bề mặt
-                        vec2 p2d = uv * 12.0 + vec2(time * 0.02, time * 0.015);
-                        float n2d = noise2D(p2d);
-                        n = mix(n, n2d, 0.08);
+                // Kết hợp TẤT CẢ
+                float n = (n1 * 0.4 + n2 * 0.2 + n3 * 0.15 + n4 * 0.1 + n5 * 0.05 + n6 * 0.1);
 
-                        // Áp dụng density (nặng hơn với pow)
-                        float density = uDensity;
-                        float shape = 1.0 - abs(n - 0.5) * 2.0;
-                        shape = pow(shape, density * 1.2);
+                // Thêm noise 2D nhiều lớp
+                vec2 p2d = uv * 20.0 + vec2(time * 0.03, time * 0.02);
+                float n2d1 = noise2D(p2d);
+                float n2d2 = noise2D(p2d * 2.0 + vec2(time * 0.05));
+                float n2d3 = noise2D(p2d * 3.0 + vec2(time * 0.07));
+                n += (n2d1 + n2d2 + n2d3) * 0.03;
 
-                        // Hiệu ứng ánh sáng chuột (nhiều phép toán)
-                        float mouseDist = distance(uv, uMouse);
-                        float mouseInfluence = 0.3 + 0.7 * (1.0 - mouseDist * 1.5);
-                        mouseInfluence = pow(mouseInfluence, 0.8);
-                        shape *= mouseInfluence;
+                // Áp dụng density (rất nặng với pow)
+                float density = uDensity;
+                float shape = 1.0 - abs(n - 0.5) * 2.0;
+                shape = pow(shape, density * 1.5);
+                shape = pow(shape, 1.2);
 
-                        // Thêm hiệu ứng sóng (nặng)
-                        float wave = sin(uv.x * 30.0 + time * 0.5) * cos(uv.y * 30.0 + time * 0.4) * 0.05;
-                        shape += wave * 0.1;
+                // Hiệu ứng chuột phức tạp
+                float mouseDist = distance(uv, uMouse);
+                float mouseInfluence = 0.2 + 0.8 * (1.0 - mouseDist * 1.8);
+                mouseInfluence = pow(mouseInfluence, 0.6);
+                shape *= mouseInfluence;
 
-                        // ---- MÀU SẮC PHỨC TẠP (nhiều phép toán) ----
-                        vec3 color1 = vec3(0.05, 0.02, 0.15);
-                        vec3 color2 = vec3(0.8, 0.1, 0.6);
-                        vec3 color3 = vec3(0.05, 0.7, 0.9);
-                        vec3 color4 = vec3(0.9, 0.2, 0.05);
-                        vec3 color5 = vec3(0.1, 0.9, 0.3);
-                        vec3 color6 = vec3(0.9, 0.8, 0.1);
+                // Sóng nhiều lớp (nặng)
+                float wave1 = sin(uv.x * 40.0 + time * 0.8) * cos(uv.y * 40.0 + time * 0.7);
+                float wave2 = sin(uv.x * 60.0 + time * 1.2) * cos(uv.y * 60.0 + time * 1.0);
+                float wave3 = sin((uv.x + uv.y) * 50.0 + time * 1.5);
+                shape += (wave1 + wave2 + wave3) * 0.02;
 
-                        float mixVal = n * 1.5 + 0.2 + sin(time * 0.05) * 0.05;
-                        vec3 col = mix(color1, color2, smoothstep(0.0, 0.3, mixVal));
-                        col = mix(col, color3, smoothstep(0.2, 0.5, mixVal));
-                        col = mix(col, color4, smoothstep(0.4, 0.7, mixVal));
-                        col = mix(col, color5, smoothstep(0.6, 0.85, mixVal));
-                        col = mix(col, color6, smoothstep(0.8, 1.0, mixVal));
+                // ---- MÀU SẮC RẤT PHỨC TẠP ----
+                vec3 colors[8];
+                colors[0] = vec3(0.05, 0.02, 0.15);
+                colors[1] = vec3(0.9, 0.1, 0.7);
+                colors[2] = vec3(0.1, 0.8, 0.9);
+                colors[3] = vec3(0.9, 0.3, 0.05);
+                colors[4] = vec3(0.1, 0.9, 0.3);
+                colors[5] = vec3(0.9, 0.8, 0.1);
+                colors[6] = vec3(0.8, 0.1, 0.9);
+                colors[7] = vec3(0.1, 0.3, 0.9);
 
-                        // Thêm độ sáng
-                        float intensity = uIntensity;
-                        col *= shape * intensity * 1.4;
+                float mixVal = n * 2.0 + 0.1 + sin(time * 0.04) * 0.08 + cos(time * 0.03) * 0.05;
+                
+                vec3 col = colors[0];
+                for (int i = 0; i < 7; i++) {
+                    float t = smoothstep(float(i) / 7.0, float(i + 1) / 7.0, mixVal);
+                    col = mix(col, colors[i + 1], t);
+                }
 
-                        // Glow trung tâm (nhiều lớp)
-                        float distToCenter = distance(uv, vec2(0.5, 0.5));
-                        float glow1 = exp(-distToCenter * 2.5) * 0.5;
-                        float glow2 = exp(-distToCenter * 5.0) * 0.3;
-                        float glow3 = exp(-distToCenter * 0.8) * 0.2;
-                        col += vec3(0.3, 0.1, 0.6) * glow1 * intensity;
-                        col += vec3(0.6, 0.2, 0.8) * glow2 * intensity;
-                        col += vec3(0.1, 0.4, 0.8) * glow3 * intensity;
+                // Thêm biến đổi màu phức tạp
+                vec3 hueShift = vec3(
+                    sin(time * 0.02 + n * 2.0) * 0.1,
+                    cos(time * 0.025 + n * 1.5) * 0.1,
+                    sin(time * 0.015 + n * 1.8) * 0.1
+                );
+                col += hueShift;
 
-                        // Highlight
-                        float highlight = pow(shape, 5.0) * 0.9;
-                        col += vec3(1.0, 0.9, 1.0) * highlight * intensity;
+                float intensity = uIntensity;
+                col *= shape * intensity * 1.5;
 
-                        // Thêm hiệu ứng hạt (nặng)
-                        vec2 grainUV = uv * 400.0 + vec2(time * 0.01);
-                        float grain = hash21(grainUV);
-                        col += (grain - 0.5) * 0.03 * intensity;
+                // Glow nhiều lớp
+                float distToCenter = distance(uv, vec2(0.5, 0.5));
+                float glow1 = exp(-distToCenter * 2.0) * 0.6;
+                float glow2 = exp(-distToCenter * 4.5) * 0.4;
+                float glow3 = exp(-distToCenter * 8.0) * 0.2;
+                float glow4 = exp(-distToCenter * 0.6) * 0.15;
+                col += vec3(0.3, 0.1, 0.6) * glow1 * intensity;
+                col += vec3(0.6, 0.2, 0.8) * glow2 * intensity;
+                col += vec3(0.1, 0.5, 0.9) * glow3 * intensity;
+                col += vec3(0.8, 0.2, 0.3) * glow4 * intensity;
 
-                        // Vignette
-                        float vignette = 1.0 - distToCenter * 0.6;
-                        col *= vignette;
+                // Highlight nhiều lớp
+                float highlight1 = pow(shape, 6.0) * 1.0;
+                float highlight2 = pow(shape, 10.0) * 0.6;
+                col += vec3(1.0, 0.95, 1.0) * highlight1 * intensity;
+                col += vec3(1.0, 0.8, 0.6) * highlight2 * intensity;
 
-                        // Thêm nhiễu màu (nặng)
-                        float colorNoise = hash21(uv * 300.0 + time * 0.01);
-                        col += (colorNoise - 0.5) * 0.02;
+                // Hiệu ứng hạt (nặng)
+                vec2 grainUV = uv * 600.0 + vec2(time * 0.02, time * 0.015);
+                float grain1 = hash21(grainUV);
+                float grain2 = hash21(grainUV * 1.5 + 10.0);
+                col += (grain1 - 0.5) * 0.04 * intensity;
+                col += (grain2 - 0.5) * 0.02 * intensity;
 
-                        col = clamp(col, 0.0, 1.0);
-                        gl_FragColor = vec4(col, 1.0);
-                    }
-                `;
+                // Vignette mạnh
+                float vignette = 1.0 - distToCenter * 0.7;
+                col *= vignette;
+
+                // Nhiễu màu
+                float colorNoise1 = hash21(uv * 400.0 + time * 0.02);
+                float colorNoise2 = hash21(uv * 500.0 + time * 0.015);
+                col += (colorNoise1 - 0.5) * 0.03;
+                col += (colorNoise2 - 0.5) * 0.02;
+
+                col = clamp(col, 0.0, 1.0);
+                gl_FragColor = vec4(col, 1.0);
+            }
+        `;
 
         const geometry = new THREE.PlaneGeometry(4, 4);
         const material = new THREE.ShaderMaterial({
@@ -536,7 +583,7 @@
         densitySlider.addEventListener('input', () => {
             const val = parseFloat(densitySlider.value);
             uniforms.uDensity.value = val;
-            densityValue.textContent = val.toFixed(2);
+            densityValue.textContent = val.toFixed(1);
         });
 
         speedSlider.addEventListener('input', () => {
@@ -548,11 +595,11 @@
         intensitySlider.addEventListener('input', () => {
             const val = parseFloat(intensitySlider.value);
             uniforms.uIntensity.value = val;
-            intensityValue.textContent = val.toFixed(2);
+            intensityValue.textContent = val.toFixed(1);
         });
 
-        console.log('🔥 Volume Shader NẶNG đã khởi động!');
-        console.log('💀 Chuẩn bị tinh thần lag nhé!');
+        console.log('💀 Volume Shader HỦY DIỆT GPU đã khởi động!');
+        console.log('🔥 Máy bạn sẽ lag nặng ngay đây!');
     </script>
 
 </body>
