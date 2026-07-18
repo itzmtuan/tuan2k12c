@@ -1,777 +1,518 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>✨ Hiệu ứng siêu xịn ✨</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>🌀 Volume Shader 3D</title>
     <style>
-        /* ===== RESET & BASE ===== */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-
         body {
-            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
-            min-height: 100vh;
-            background: #0a0e1a;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            background: #0a0a0f;
             overflow: hidden;
-            position: relative;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            color: #fff;
+            height: 100vh;
+            width: 100vw;
         }
 
-        /* ===== NỀN ĐỘNG (Particle + Gradient) ===== */
-        .bg-canvas {
+        #canvas-container {
             position: fixed;
             top: 0;
             left: 0;
             width: 100vw;
             height: 100vh;
             z-index: 0;
-            background: radial-gradient(ellipse at 20% 50%, #1a1a3e 0%, #0a0e1a 70%);
-            overflow: hidden;
         }
 
-        /* Hạt nền */
-        .particle {
-            position: absolute;
-            border-radius: 50%;
-            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.8), rgba(100, 150, 255, 0.2));
-            animation: floatParticle linear infinite;
-            opacity: 0.3;
-            pointer-events: none;
-        }
-
-        @keyframes floatParticle {
-            0% {
-                transform: translateY(100vh) scale(0);
-                opacity: 0;
-            }
-            10% {
-                opacity: 0.6;
-            }
-            90% {
-                opacity: 0.6;
-            }
-            100% {
-                transform: translateY(-10vh) scale(1.2);
-                opacity: 0;
-            }
-        }
-
-        /* Sóng ánh sáng nền */
-        .glow-orb {
-            position: absolute;
-            border-radius: 50%;
-            filter: blur(80px);
-            pointer-events: none;
-            animation: orbFloat 8s ease-in-out infinite alternate;
-        }
-
-        .glow-orb:nth-child(1) {
-            width: 500px;
-            height: 500px;
-            background: rgba(99, 102, 241, 0.15);
-            top: -100px;
-            left: -100px;
-            animation-delay: 0s;
-        }
-
-        .glow-orb:nth-child(2) {
-            width: 400px;
-            height: 400px;
-            background: rgba(236, 72, 153, 0.12);
-            bottom: -50px;
-            right: -50px;
-            animation-delay: -3s;
-        }
-
-        .glow-orb:nth-child(3) {
-            width: 300px;
-            height: 300px;
-            background: rgba(52, 211, 153, 0.10);
-            top: 50%;
+        /* === UI ĐIỀU KHIỂN === */
+        .control-panel {
+            position: fixed;
+            bottom: 30px;
             left: 50%;
-            transform: translate(-50%, -50%);
-            animation-delay: -5s;
-        }
-
-        @keyframes orbFloat {
-            0% {
-                transform: translate(0, 0) scale(1);
-            }
-            33% {
-                transform: translate(60px, -40px) scale(1.1);
-            }
-            66% {
-                transform: translate(-30px, 50px) scale(0.9);
-            }
-            100% {
-                transform: translate(20px, -20px) scale(1.05);
-            }
-        }
-
-        /* ===== CONTAINER CHÍNH ===== */
-        .container {
-            position: relative;
-            z-index: 1;
-            max-width: 1100px;
-            width: 100%;
-            padding: 2rem;
-        }
-
-        /* ===== THẺ GLASSMORPHISM ===== */
-        .glass-card {
-            background: rgba(255, 255, 255, 0.04);
-            backdrop-filter: blur(24px);
-            -webkit-backdrop-filter: blur(24px);
-            border-radius: 3rem;
-            padding: 3rem 2.5rem;
+            transform: translateX(-50%);
+            z-index: 10;
+            background: rgba(0, 0, 0, 0.65);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 60px;
+            padding: 1rem 2rem;
             border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
-            animation: fadeInUp 0.8s ease forwards;
-        }
-
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(40px) scale(0.96);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
-        }
-
-        /* ===== TIÊU ĐỀ ===== */
-        .header {
-            text-align: center;
-            margin-bottom: 3rem;
-        }
-
-        .header h1 {
-            font-size: 3.5rem;
-            font-weight: 800;
-            background: linear-gradient(135deg, #60a5fa, #a78bfa, #f472b6, #60a5fa);
-            background-size: 300% 300%;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            animation: gradientMove 4s ease-in-out infinite;
-            letter-spacing: -1px;
-        }
-
-        @keyframes gradientMove {
-            0%,
-            100% {
-                background-position: 0% 50%;
-            }
-            50% {
-                background-position: 100% 50%;
-            }
-        }
-
-        .header p {
-            color: #94a3b8;
-            font-size: 1.1rem;
-            margin-top: 0.5rem;
-            letter-spacing: 2px;
-        }
-
-        .header .line {
-            width: 80px;
-            height: 3px;
-            background: linear-gradient(90deg, #60a5fa, #a78bfa);
-            margin: 1rem auto 0;
-            border-radius: 10px;
-            animation: linePulse 2s ease-in-out infinite;
-        }
-
-        @keyframes linePulse {
-            0%,
-            100% {
-                width: 80px;
-                opacity: 1;
-            }
-            50% {
-                width: 120px;
-                opacity: 0.6;
-            }
-        }
-
-        /* ===== GRID THẺ ===== */
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2.5rem;
-        }
-
-        /* ===== MỖI THẺ ===== */
-        .item {
-            background: rgba(255, 255, 255, 0.03);
-            border-radius: 1.8rem;
-            padding: 1.8rem 1.5rem;
-            text-align: center;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            cursor: default;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .item::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: conic-gradient(from 0deg, transparent, rgba(96, 165, 250, 0.05), transparent, rgba(167, 139, 250, 0.05), transparent);
-            animation: rotateBg 6s linear infinite;
-            opacity: 0;
-            transition: opacity 0.5s;
-        }
-
-        .item:hover::before {
-            opacity: 1;
-        }
-
-        @keyframes rotateBg {
-            0% {
-                transform: rotate(0deg);
-            }
-            100% {
-                transform: rotate(360deg);
-            }
-        }
-
-        .item:hover {
-            transform: translateY(-8px) scale(1.02);
-            border-color: rgba(96, 165, 250, 0.2);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3), inset 0 0 30px rgba(96, 165, 250, 0.05);
-        }
-
-        .item .icon {
-            font-size: 3rem;
-            display: block;
-            margin-bottom: 0.8rem;
-            animation: iconFloat 3s ease-in-out infinite;
-        }
-
-        .item:nth-child(2) .icon {
-            animation-delay: 0.4s;
-        }
-        .item:nth-child(3) .icon {
-            animation-delay: 0.8s;
-        }
-        .item:nth-child(4) .icon {
-            animation-delay: 1.2s;
-        }
-        .item:nth-child(5) .icon {
-            animation-delay: 0.6s;
-        }
-        .item:nth-child(6) .icon {
-            animation-delay: 1.0s;
-        }
-
-        @keyframes iconFloat {
-            0%,
-            100% {
-                transform: translateY(0) rotate(0deg);
-            }
-            50% {
-                transform: translateY(-10px) rotate(4deg);
-            }
-        }
-
-        .item .title {
-            color: #e2e8f0;
-            font-weight: 600;
-            font-size: 1.1rem;
-        }
-
-        .item .desc {
-            color: #94a3b8;
-            font-size: 0.85rem;
-            margin-top: 0.3rem;
-        }
-
-        /* ===== NÚT ===== */
-        .btn-group {
             display: flex;
             flex-wrap: wrap;
+            align-items: center;
             justify-content: center;
-            gap: 1rem;
-            margin-top: 1rem;
+            gap: 1.5rem 2.5rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+            min-width: 280px;
         }
 
-        .btn {
-            padding: 0.9rem 2.5rem;
-            border: none;
-            border-radius: 60px;
-            font-weight: 600;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            position: relative;
-            overflow: hidden;
-            letter-spacing: 0.5px;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-            color: white;
-            box-shadow: 0 4px 25px rgba(59, 130, 246, 0.3);
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-4px) scale(1.04);
-            box-shadow: 0 8px 40px rgba(59, 130, 246, 0.5);
-        }
-
-        .btn-primary:active {
-            transform: scale(0.96);
-        }
-
-        .btn-secondary {
-            background: rgba(255, 255, 255, 0.05);
-            color: #e2e8f0;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-        }
-
-        .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.10);
-            transform: translateY(-4px);
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
-        }
-
-        /* Ripple effect */
-        .btn .ripple {
-            position: absolute;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.3);
-            transform: scale(0);
-            animation: rippleAnim 0.6s linear forwards;
-            pointer-events: none;
-        }
-
-        @keyframes rippleAnim {
-            to {
-                transform: scale(4);
-                opacity: 0;
-            }
-        }
-
-        /* ===== THANH TIẾN TRÌNH ===== */
-        .progress-section {
-            margin: 2.5rem 0 1.5rem;
-            padding: 1.5rem;
-            background: rgba(255, 255, 255, 0.02);
-            border-radius: 2rem;
-            border: 1px solid rgba(255, 255, 255, 0.04);
-        }
-
-        .progress-label {
+        .control-group {
             display: flex;
-            justify-content: space-between;
-            color: #94a3b8;
-            font-size: 0.9rem;
-            margin-bottom: 0.6rem;
+            align-items: center;
+            gap: 0.8rem;
         }
 
-        .progress-bar {
-            width: 100%;
-            height: 8px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 20px;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .progress-fill {
-            height: 100%;
-            width: 0%;
-            border-radius: 20px;
-            background: linear-gradient(90deg, #3b82f6, #a78bfa, #f472b6);
-            background-size: 200% 100%;
-            animation: progressGradient 2s linear infinite;
-            transition: width 1s cubic-bezier(0.22, 1, 0.36, 1);
-        }
-
-        @keyframes progressGradient {
-            0% {
-                background-position: 0% 0%;
-            }
-            100% {
-                background-position: 200% 0%;
-            }
-        }
-
-        .progress-fill.active {
-            width: 78%;
-        }
-
-        /* ===== FOOTER ===== */
-        .footer-text {
-            text-align: center;
-            color: #475569;
-            font-size: 0.8rem;
-            margin-top: 2rem;
-            border-top: 1px solid rgba(255, 255, 255, 0.03);
-            padding-top: 1.5rem;
+        .control-group label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
             letter-spacing: 1px;
+            color: #94a3b8;
+            min-width: 50px;
         }
 
-        .footer-text .heart {
-            color: #f472b6;
-            animation: heartBeat 1.2s ease-in-out infinite;
-            display: inline-block;
+        .control-group input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 140px;
+            height: 4px;
+            background: linear-gradient(90deg, #3b82f6, #a78bfa);
+            border-radius: 10px;
+            outline: none;
+            transition: 0.2s;
+            cursor: pointer;
         }
 
-        @keyframes heartBeat {
-            0%,
-            100% {
-                transform: scale(1);
-            }
-            15% {
-                transform: scale(1.3);
-            }
-            30% {
-                transform: scale(1);
-            }
-            45% {
-                transform: scale(1.2);
-            }
-            60% {
-                transform: scale(1);
-            }
+        .control-group input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #a78bfa, #7c3aed);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            cursor: pointer;
+            box-shadow: 0 0 20px rgba(167, 139, 250, 0.3);
+            transition: 0.15s;
         }
 
-        /* ===== RESPONSIVE ===== */
+        .control-group input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.15);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .control-group .value-display {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #e2e8f0;
+            min-width: 32px;
+            text-align: center;
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* === RESPONSIVE === */
         @media (max-width: 700px) {
-            .glass-card {
-                padding: 1.8rem 1.2rem;
-                border-radius: 2rem;
+            .control-panel {
+                bottom: 16px;
+                padding: 0.8rem 1.2rem;
+                border-radius: 40px;
+                gap: 0.8rem 1.2rem;
+                min-width: unset;
+                width: calc(100% - 32px);
             }
-            .header h1 {
-                font-size: 2.2rem;
+            .control-group input[type="range"] {
+                width: 80px;
             }
-            .grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 1rem;
+            .control-group label {
+                font-size: 0.65rem;
+                min-width: 36px;
             }
-            .item {
-                padding: 1.2rem 0.8rem;
-            }
-            .item .icon {
-                font-size: 2.2rem;
-            }
-            .btn {
-                padding: 0.7rem 1.8rem;
-                font-size: 0.9rem;
+            .control-group .value-display {
+                font-size: 0.75rem;
+                min-width: 24px;
             }
         }
 
         @media (max-width: 450px) {
-            .grid {
-                grid-template-columns: 1fr 1fr;
-                gap: 0.7rem;
+            .control-panel {
+                flex-direction: column;
+                gap: 0.4rem;
+                padding: 0.6rem 1rem;
+                border-radius: 30px;
+                bottom: 12px;
             }
-            .item .title {
-                font-size: 0.9rem;
+            .control-group {
+                width: 100%;
+                justify-content: space-between;
             }
-            .item .desc {
-                font-size: 0.7rem;
-            }
-            .header h1 {
-                font-size: 1.8rem;
+            .control-group input[type="range"] {
+                flex: 1;
+                width: unset;
             }
         }
 
-        /* ===== HIỆU ỨNG TẢI TRANG ===== */
-        .item {
-            animation: cardAppear 0.6s ease backwards;
+        /* === LOADING === */
+        .loading {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 20;
+            color: #94a3b8;
+            font-size: 1.2rem;
+            letter-spacing: 2px;
+            animation: pulseLoading 1.5s ease-in-out infinite;
         }
-        .item:nth-child(1) {
-            animation-delay: 0.05s;
-        }
-        .item:nth-child(2) {
-            animation-delay: 0.10s;
-        }
-        .item:nth-child(3) {
-            animation-delay: 0.15s;
-        }
-        .item:nth-child(4) {
-            animation-delay: 0.20s;
-        }
-        .item:nth-child(5) {
-            animation-delay: 0.25s;
-        }
-        .item:nth-child(6) {
-            animation-delay: 0.30s;
-        }
-
-        @keyframes cardAppear {
-            from {
-                opacity: 0;
-                transform: translateY(30px) scale(0.9);
+        @keyframes pulseLoading {
+            0%,
+            100% {
+                opacity: 0.4;
             }
-            to {
+            50% {
                 opacity: 1;
-                transform: translateY(0) scale(1);
             }
         }
 
-        /* ===== TEXT GLOW ===== */
-        .glow-text {
-            color: #e2e8f0;
-            text-shadow: 0 0 20px rgba(96, 165, 250, 0.1);
+        /* FPS hiển thị nhỏ */
+        .fps-counter {
+            position: fixed;
+            top: 16px;
+            right: 20px;
+            z-index: 10;
+            color: rgba(255, 255, 255, 0.15);
+            font-size: 0.7rem;
+            font-family: monospace;
+            pointer-events: none;
+            letter-spacing: 0.5px;
         }
     </style>
 </head>
 <body>
 
-    <!-- ===== NỀN ĐỘNG ===== -->
-    <div class="bg-canvas" id="bgCanvas">
-        <div class="glow-orb"></div>
-        <div class="glow-orb"></div>
-        <div class="glow-orb"></div>
-    </div>
+    <!-- Loading -->
+    <div class="loading" id="loading">⏳ Đang tải Volume Shader...</div>
 
-    <!-- ===== NỘI DUNG CHÍNH ===== -->
-    <div class="container">
-        <div class="glass-card">
+    <!-- Container cho Three.js -->
+    <div id="canvas-container"></div>
 
-            <!-- Header -->
-            <div class="header">
-                <h1>✨ Hiệu ứng siêu xịn</h1>
-                <p>Hoạt ảnh mượt mà · Glassmorphism · Gradient động</p>
-                <div class="line"></div>
-            </div>
+    <!-- FPS -->
+    <div class="fps-counter" id="fpsCounter">-- FPS</div>
 
-            <!-- Grid thẻ -->
-            <div class="grid">
-                <div class="item">
-                    <span class="icon">🚀</span>
-                    <div class="title">Bay lên</div>
-                    <div class="desc">Hiệu ứng nổi</div>
-                </div>
-                <div class="item">
-                    <span class="icon">🌈</span>
-                    <div class="title">Cầu vồng</div>
-                    <div class="desc">Gradient động</div>
-                </div>
-                <div class="item">
-                    <span class="icon">💎</span>
-                    <div class="title">Glassmorph</div>
-                    <div class="desc">Kính mờ</div>
-                </div>
-                <div class="item">
-                    <span class="icon">🌀</span>
-                    <div class="title">Xoay vòng</div>
-                    <div class="desc">Hiệu ứng conic</div>
-                </div>
-                <div class="item">
-                    <span class="icon">✨</span>
-                    <div class="title">Lấp lánh</div>
-                    <div class="desc">Ánh sáng</div>
-                </div>
-                <div class="item">
-                    <span class="icon">🎯</span>
-                    <div class="title">Tương tác</div>
-                    <div class="desc">Hover đẹp</div>
-                </div>
-            </div>
+    <!-- === Bảng điều khiển === -->
+    <div class="control-panel" id="controls">
+        <!-- Độ nặng (Density) -->
+        <div class="control-group">
+            <label>🌀 Nặng</label>
+            <input type="range" id="densitySlider" min="0.1" max="3.0" step="0.01" value="1.2" />
+            <span class="value-display" id="densityValue">1.20</span>
+        </div>
 
-            <!-- Thanh tiến trình -->
-            <div class="progress-section">
-                <div class="progress-label">
-                    <span>🚀 Tiến trình tải</span>
-                    <span id="progressText">78%</span>
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill active" id="progressFill"></div>
-                </div>
-            </div>
+        <!-- Tốc độ xoay -->
+        <div class="control-group">
+            <label>⚡ Xoay</label>
+            <input type="range" id="speedSlider" min="0.0" max="0.8" step="0.01" value="0.3" />
+            <span class="value-display" id="speedValue">0.30</span>
+        </div>
 
-            <!-- Nút bấm -->
-            <div class="btn-group">
-                <button class="btn btn-primary" id="btnMagic">✨ Bấm tôi đi</button>
-                <button class="btn btn-secondary" id="btnReset">🔄 Làm mới</button>
-            </div>
-
-            <!-- Footer -->
-            <div class="footer-text">
-                Làm với <span class="heart">♥</span> bằng CSS & JavaScript · 2026
-            </div>
-
+        <!-- Độ sáng / Intensity -->
+        <div class="control-group">
+            <label>💡 Sáng</label>
+            <input type="range" id="intensitySlider" min="0.2" max="2.5" step="0.01" value="1.0" />
+            <span class="value-display" id="intensityValue">1.00</span>
         </div>
     </div>
 
-    <script>
-        // =============================================
-        // 1. TẠO HẠT NỀN (Particle)
-        // =============================================
-        (function createParticles() {
-            const canvas = document.getElementById('bgCanvas');
-            const count = 35;
-
-            for (let i = 0; i < count; i++) {
-                const p = document.createElement('div');
-                p.className = 'particle';
-                const size = Math.random() * 6 + 3;
-                p.style.width = size + 'px';
-                p.style.height = size + 'px';
-                p.style.left = Math.random() * 100 + '%';
-                p.style.animationDuration = (Math.random() * 12 + 8) + 's';
-                p.style.animationDelay = (Math.random() * 12) + 's';
-                p.style.opacity = Math.random() * 0.4 + 0.1;
-                canvas.appendChild(p);
+    <!-- ============================================================ -->
+    <!-- THREE.JS + SHADER                                         -->
+    <!-- ============================================================ -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js"
             }
-        })();
+        }
+    </script>
 
-        // =============================================
-        // 2. THANH TIẾN TRÌNH (mô phỏng)
-        // =============================================
-        const progressFill = document.getElementById('progressFill');
-        const progressText = document.getElementById('progressText');
-        let progress = 78;
+    <script type="module">
+        // ---- IMPORTS ----
+        import * as THREE from 'three';
+        import { OrbitControls } from 'https://unpkg.com/three@0.160.0/examples/jsm/controls/OrbitControls.js';
 
-        function updateProgress(val) {
-            progress = Math.min(100, Math.max(0, val));
-            progressFill.style.width = progress + '%';
-            progressText.textContent = Math.round(progress) + '%';
+        // ---- DOM ----
+        const container = document.getElementById('canvas-container');
+        const loadingEl = document.getElementById('loading');
+        const fpsEl = document.getElementById('fpsCounter');
+
+        const densitySlider = document.getElementById('densitySlider');
+        const densityValue = document.getElementById('densityValue');
+        const speedSlider = document.getElementById('speedSlider');
+        const speedValue = document.getElementById('speedValue');
+        const intensitySlider = document.getElementById('intensitySlider');
+        const intensityValue = document.getElementById('intensityValue');
+
+        // ---- SCENE ----
+        const scene = new THREE.Scene();
+
+        // ---- CAMERA ----
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
+        camera.position.set(3, 2, 5);
+        camera.lookAt(0, 0, 0);
+
+        // ---- RENDERER ----
+        const renderer = new THREE.WebGLRenderer({
+            antialias: true,
+            alpha: false,
+            powerPreference: "high-performance"
+        });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.setClearColor(0x0a0a0f, 1);
+        container.appendChild(renderer.domElement);
+
+        // ---- CONTROLS (cho phép kéo xoay) ----
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.06;
+        controls.autoRotate = false;
+        controls.enableZoom = true;
+        controls.rotateSpeed = 0.8;
+        controls.target.set(0, 0, 0);
+        controls.update();
+
+        // ---- SHADER UNIFORMS ----
+        const uniforms = {
+            uTime: { value: 0 },
+            uDensity: { value: parseFloat(densitySlider.value) },
+            uSpeed: { value: parseFloat(speedSlider.value) },
+            uIntensity: { value: parseFloat(intensitySlider.value) },
+            uResolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
+            uMouse: { value: new THREE.Vector2(0.5, 0.5) }
+        };
+
+        // ---- VERTEX SHADER ----
+        const vertexShader = `
+                    varying vec3 vPosition;
+                    varying vec2 vUv;
+                    void main() {
+                        vUv = uv;
+                        vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+                        vPosition = mvPosition.xyz;
+                        gl_Position = projectionMatrix * mvPosition;
+                    }
+                `;
+
+        // ---- FRAGMENT SHADER (VOLUME SHADER) ----
+        const fragmentShader = `
+                    precision highp float;
+
+                    varying vec3 vPosition;
+                    varying vec2 vUv;
+
+                    uniform float uTime;
+                    uniform float uDensity;
+                    uniform float uSpeed;
+                    uniform float uIntensity;
+                    uniform vec2  uResolution;
+                    uniform vec2  uMouse;
+
+                    // ---- Hàm noise 3D đơn giản ----
+                    float hash(vec3 p) {
+                        p = fract(p * 0.3183099 + .1);
+                        p *= 17.0;
+                        return fract(p.x * p.y * p.z * (p.x + p.y + p.z));
+                    }
+
+                    float noise(vec3 p) {
+                        vec3 i = floor(p);
+                        vec3 f = fract(p);
+                        f = f * f * (3.0 - 2.0 * f);
+                        return mix(
+                            mix(
+                                mix(hash(i + vec3(0,0,0)), hash(i + vec3(1,0,0)), f.x),
+                                mix(hash(i + vec3(0,1,0)), hash(i + vec3(1,1,0)), f.x),
+                                f.y
+                            ),
+                            mix(
+                                mix(hash(i + vec3(0,0,1)), hash(i + vec3(1,0,1)), f.x),
+                                mix(hash(i + vec3(0,1,1)), hash(i + vec3(1,1,1)), f.x),
+                                f.y
+                            ),
+                            f.z
+                        );
+                    }
+
+                    // ---- FBM (Fractal Brownian Motion) ----
+                    float fbm(vec3 p, int octaves) {
+                        float value = 0.0;
+                        float amp = 0.5;
+                        float freq = 1.0;
+                        for (int i = 0; i < 5; i++) {
+                            if (i >= octaves) break;
+                            value += amp * noise(p * freq);
+                            freq *= 2.0;
+                            amp *= 0.5;
+                        }
+                        return value;
+                    }
+
+                    void main() {
+                        // Tọa độ UV + thời gian
+                        vec2 uv = vUv;
+                        float time = uTime * uSpeed;
+
+                        // Tạo 3D position để sample noise
+                        vec3 pos = vec3(uv * 2.0 - 1.0, 0.0);
+                        // Thêm depth dựa trên vị trí z (để có hiệu ứng volume)
+                        float depth = vPosition.z * 0.8 + 0.5;
+
+                        // Scale để có nhiều chi tiết
+                        vec3 p = pos * 2.5;
+                        p.z += time * 0.15;
+                        p.x += time * 0.05;
+                        p.y += time * 0.08;
+
+                        // ---- Lấy noise ----
+                        float n = fbm(p, 5);
+
+                        // Thêm lớp noise thứ 2 để tạo chi tiết mịn hơn
+                        vec3 p2 = p * 3.0 + vec3(time * 0.1, time * 0.07, time * 0.05);
+                        float n2 = fbm(p2, 3);
+                        n = mix(n, n2, 0.3);
+
+                        // Áp dụng độ nặng (density) - làm sắc nét hoặc mờ hơn
+                        float density = uDensity;
+                        float shape = 1.0 - abs(n - 0.5) * 2.0;
+                        shape = pow(shape, density);
+
+                        // Thêm hiệu ứng ánh sáng dựa trên vị trí chuột
+                        float mouseInfluence = 0.3 + 0.7 * (1.0 - distance(uv, uMouse) * 1.2);
+                        shape *= mouseInfluence;
+
+                        // Màu sắc gradient dựa trên n và vị trí
+                        vec3 color1 = vec3(0.1, 0.05, 0.25); // tím đậm
+                        vec3 color2 = vec3(0.8, 0.2, 0.6);   // hồng tím
+                        vec3 color3 = vec3(0.1, 0.8, 0.9);   // xanh ngọc
+                        vec3 color4 = vec3(0.9, 0.3, 0.1);   // cam
+
+                        // Mix màu theo noise
+                        float mixVal = n * 1.2 + 0.2;
+                        vec3 col = mix(color1, color2, smoothstep(0.0, 0.5, mixVal));
+                        col = mix(col, color3, smoothstep(0.3, 0.7, mixVal));
+                        col = mix(col, color4, smoothstep(0.6, 1.0, mixVal));
+
+                        // Thêm độ sáng
+                        float intensity = uIntensity;
+                        col *= shape * intensity * 1.2;
+
+                        // Thêm glow ở trung tâm
+                        float distToCenter = distance(uv, vec2(0.5, 0.5));
+                        float glow = exp(-distToCenter * 2.5) * 0.5;
+                        col += vec3(0.3, 0.1, 0.6) * glow * intensity;
+
+                        // Thêm highlight sáng
+                        float highlight = pow(shape, 4.0) * 0.8;
+                        col += vec3(1.0, 0.9, 1.0) * highlight * intensity;
+
+                        // Vignette (tối viền)
+                        float vignette = 1.0 - distToCenter * 0.5;
+                        col *= vignette;
+
+                        // Gamma và xuất
+                        col = clamp(col, 0.0, 1.0);
+                        gl_FragColor = vec4(col, 1.0);
+                    }
+                `;
+
+        // ---- TẠO MATERIAL VÀ MESH ----
+        const geometry = new THREE.PlaneGeometry(4, 4);
+        const material = new THREE.ShaderMaterial({
+            uniforms: uniforms,
+            vertexShader: vertexShader,
+            fragmentShader: fragmentShader,
+            side: THREE.DoubleSide,
+            transparent: false,
+            depthWrite: false,
+        });
+
+        const mesh = new THREE.Mesh(geometry, material);
+        mesh.position.set(0, 0, 0);
+        scene.add(mesh);
+
+        // ---- ẨN LOADING ----
+        loadingEl.style.display = 'none';
+
+        // ---- RESIZE ----
+        function onResize() {
+            const w = window.innerWidth;
+            const h = window.innerHeight;
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+            renderer.setSize(w, h);
+            uniforms.uResolution.value.set(w, h);
+        }
+        window.addEventListener('resize', onResize);
+
+        // ---- MOUSE TRACKING ----
+        const mouse = new THREE.Vector2(0.5, 0.5);
+        window.addEventListener('mousemove', (e) => {
+            mouse.x = e.clientX / window.innerWidth;
+            mouse.y = 1.0 - (e.clientY / window.innerHeight);
+            uniforms.uMouse.value.set(mouse.x, mouse.y);
+        });
+
+        // ---- FPS COUNTER ----
+        let frameCount = 0;
+        let fpsTime = 0;
+
+        // ---- ANIMATION LOOP ----
+        function animate(time) {
+            requestAnimationFrame(animate);
+
+            // Update uniforms
+            uniforms.uTime.value = time * 0.001;
+
+            // Update controls
+            controls.update();
+
+            // Render
+            renderer.render(scene, camera);
+
+            // FPS
+            frameCount++;
+            if (time - fpsTime >= 1000) {
+                fpsEl.textContent = `${frameCount} FPS`;
+                frameCount = 0;
+                fpsTime = time;
+            }
         }
 
-        // =============================================
-        // 3. NÚT "Bấm tôi đi" - Ripple + Magic
-        // =============================================
-        const btnMagic = document.getElementById('btnMagic');
+        animate(0);
 
-        btnMagic.addEventListener('click', function(e) {
-            // Ripple
-            const ripple = document.createElement('span');
-            ripple.className = 'ripple';
-            const rect = this.getBoundingClientRect();
-            const size = Math.max(rect.width, rect.height);
-            ripple.style.width = ripple.style.height = size + 'px';
-            ripple.style.left = (e.clientX - rect.left - size / 2) + 'px';
-            ripple.style.top = (e.clientY - rect.top - size / 2) + 'px';
-            this.appendChild(ripple);
-            setTimeout(() => ripple.remove(), 600);
-
-            // Tăng tiến trình ngẫu nhiên
-            const increase = Math.floor(Math.random() * 15) + 5;
-            const newVal = Math.min(100, progress + increase);
-            updateProgress(newVal);
-
-            // Hiệu ứng đặc biệt: đổi màu nền của glass-card
-            const card = document.querySelector('.glass-card');
-            const hue = Math.floor(Math.random() * 360);
-            card.style.transition = 'border-color 0.5s, box-shadow 0.5s';
-            card.style.borderColor = `hsla(${hue}, 80%, 60%, 0.3)`;
-            card.style.boxShadow = `0 30px 80px rgba(0,0,0,0.5), 0 0 60px hsla(${hue}, 80%, 60%, 0.05)`;
-            setTimeout(() => {
-                card.style.borderColor = 'rgba(255,255,255,0.08)';
-                card.style.boxShadow = '0 30px 80px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05)';
-            }, 1000);
+        // ---- UI CONTROLS ----
+        densitySlider.addEventListener('input', () => {
+            const val = parseFloat(densitySlider.value);
+            uniforms.uDensity.value = val;
+            densityValue.textContent = val.toFixed(2);
         });
 
-        // =============================================
-        // 4. NÚT "Làm mới" - Reset tiến trình
-        // =============================================
-        const btnReset = document.getElementById('btnReset');
-
-        btnReset.addEventListener('click', function() {
-            updateProgress(0);
-            // Tăng dần lên 78% trong 2 giây
-            let current = 0;
-            const target = 78;
-            const step = () => {
-                current += 1.5;
-                if (current >= target) {
-                    updateProgress(target);
-                    return;
-                }
-                updateProgress(current);
-                requestAnimationFrame(step);
-            };
-            step();
-
-            // Reset border card
-            const card = document.querySelector('.glass-card');
-            card.style.transition = 'border-color 0.5s, box-shadow 0.5s';
-            card.style.borderColor = 'rgba(255,255,255,0.08)';
-            card.style.boxShadow = '0 30px 80px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05)';
+        speedSlider.addEventListener('input', () => {
+            const val = parseFloat(speedSlider.value);
+            uniforms.uSpeed.value = val;
+            speedValue.textContent = val.toFixed(2);
         });
 
-        // =============================================
-        // 5. TỰ ĐỘNG TĂNG NHẸ KHI TẢI
-        // =============================================
-        // Khởi tạo progress từ 0 lên 78%
-        let loadProgress = 0;
-        const loadInterval = setInterval(() => {
-            loadProgress += 2;
-            if (loadProgress >= 78) {
-                updateProgress(78);
-                clearInterval(loadInterval);
-                return;
+        intensitySlider.addEventListener('input', () => {
+            const val = parseFloat(intensitySlider.value);
+            uniforms.uIntensity.value = val;
+            intensityValue.textContent = val.toFixed(2);
+        });
+
+        // ---- XỬ LÝ TOUCH CHO MOBILE ----
+        window.addEventListener('touchmove', (e) => {
+            if (e.touches.length > 0) {
+                const touch = e.touches[0];
+                mouse.x = touch.clientX / window.innerWidth;
+                mouse.y = 1.0 - (touch.clientY / window.innerHeight);
+                uniforms.uMouse.value.set(mouse.x, mouse.y);
             }
-            updateProgress(loadProgress);
-        }, 60);
+        }, { passive: true });
 
-        // =============================================
-        // 6. HIỆU ỨNG DI CHUYỂN CHUỘT CHO GLOW ORB
-        // =============================================
-        document.addEventListener('mousemove', (e) => {
-            const x = e.clientX / window.innerWidth;
-            const y = e.clientY / window.innerHeight;
-            const orbs = document.querySelectorAll('.glow-orb');
-            orbs.forEach((orb, i) => {
-                const speed = 20 + i * 10;
-                const moveX = (x - 0.5) * speed;
-                const moveY = (y - 0.5) * speed;
-                orb.style.transform = `translate(${moveX}px, ${moveY}px) scale(${1 + (x - 0.5) * 0.1})`;
-            });
-        });
-
-        // =============================================
-        // 7. THÊM HIỆU ỨNG SAO BĂNG (thêm vào background)
-        // =============================================
-        (function addShootingStar() {
-            const canvas = document.getElementById('bgCanvas');
-            const star = document.createElement('div');
-            star.style.position = 'absolute';
-            star.style.width = '2px';
-            star.style.height = '2px';
-            star.style.background = 'white';
-            star.style.borderRadius = '50%';
-            star.style.boxShadow = '0 0 10px rgba(255,255,255,0.8), 0 0 30px rgba(100,150,255,0.4)';
-            star.style.left = '-20px';
-            star.style.top = '-20px';
-            star.style.animation = 'shootingStar 4s linear infinite';
-            star.style.pointerEvents = 'none';
-            canvas.appendChild(star);
-
-            // Thêm style cho sao băng
-            const style = document.createElement('style');
-            style.textContent = `
-                        @keyframes shootingStar {
-                            0% { transform: translate(0, 0) scale(1); opacity: 1; }
-                            5% { opacity: 1; }
-                            15% { opacity: 0; }
-                            20% { transform: translate(80vw, 60vh) scale(0.2); opacity: 0; }
-                            100% { transform: translate(80vw, 60vh) scale(0.2); opacity: 0; }
-                        }
-                    `;
-            document.head.appendChild(style);
-        })();
-
-        console.log('✨ Trang web với hiệu ứng siêu xịn đã sẵn sàng!');
+        console.log('🌀 Volume Shader đã khởi động!');
+        console.log('💡 Điều chỉnh thanh trượt để thay đổi hiệu ứng.');
     </script>
 
 </body>
