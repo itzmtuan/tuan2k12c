@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>🌀 Volume Shader 3D</title>
+    <title>🌀 Volume Shader NẶNG (Lag)</title>
     <style>
         * {
             margin: 0;
@@ -28,16 +28,14 @@
             z-index: 0;
         }
 
-        /* === UI ĐIỀU KHIỂN === */
         .control-panel {
             position: fixed;
             bottom: 30px;
             left: 50%;
             transform: translateX(-50%);
             z-index: 10;
-            background: rgba(0, 0, 0, 0.65);
+            background: rgba(0, 0, 0, 0.75);
             backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
             border-radius: 60px;
             padding: 1rem 2rem;
             border: 1px solid rgba(255, 255, 255, 0.08);
@@ -104,7 +102,46 @@
             font-variant-numeric: tabular-nums;
         }
 
-        /* === RESPONSIVE === */
+        .fps-counter {
+            position: fixed;
+            top: 16px;
+            right: 20px;
+            z-index: 10;
+            color: rgba(255, 255, 255, 0.15);
+            font-size: 0.7rem;
+            font-family: monospace;
+            pointer-events: none;
+            letter-spacing: 0.5px;
+        }
+
+        .lag-indicator {
+            position: fixed;
+            top: 16px;
+            left: 20px;
+            z-index: 10;
+            color: #ff6b6b;
+            font-size: 0.8rem;
+            font-weight: 700;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 0.3rem 1rem;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 100, 100, 0.2);
+            animation: pulseLag 1s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        @keyframes pulseLag {
+            0%,
+            100% {
+                opacity: 0.6;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.05);
+            }
+        }
+
         @media (max-width: 700px) {
             .control-panel {
                 bottom: 16px;
@@ -144,81 +181,33 @@
                 width: unset;
             }
         }
-
-        /* === LOADING === */
-        .loading {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 20;
-            color: #94a3b8;
-            font-size: 1.2rem;
-            letter-spacing: 2px;
-            animation: pulseLoading 1.5s ease-in-out infinite;
-        }
-        @keyframes pulseLoading {
-            0%,
-            100% {
-                opacity: 0.4;
-            }
-            50% {
-                opacity: 1;
-            }
-        }
-
-        /* FPS hiển thị nhỏ */
-        .fps-counter {
-            position: fixed;
-            top: 16px;
-            right: 20px;
-            z-index: 10;
-            color: rgba(255, 255, 255, 0.15);
-            font-size: 0.7rem;
-            font-family: monospace;
-            pointer-events: none;
-            letter-spacing: 0.5px;
-        }
     </style>
 </head>
 <body>
 
-    <!-- Loading -->
-    <div class="loading" id="loading">⏳ Đang tải Volume Shader...</div>
-
-    <!-- Container cho Three.js -->
     <div id="canvas-container"></div>
 
-    <!-- FPS -->
+    <div class="lag-indicator">🔥 LAG MODE (Nặng)</div>
     <div class="fps-counter" id="fpsCounter">-- FPS</div>
 
-    <!-- === Bảng điều khiển === -->
     <div class="control-panel" id="controls">
-        <!-- Độ nặng (Density) -->
         <div class="control-group">
             <label>🌀 Nặng</label>
-            <input type="range" id="densitySlider" min="0.1" max="3.0" step="0.01" value="1.2" />
-            <span class="value-display" id="densityValue">1.20</span>
+            <input type="range" id="densitySlider" min="0.5" max="5.0" step="0.1" value="2.5" />
+            <span class="value-display" id="densityValue">2.50</span>
         </div>
-
-        <!-- Tốc độ xoay -->
         <div class="control-group">
             <label>⚡ Xoay</label>
-            <input type="range" id="speedSlider" min="0.0" max="0.8" step="0.01" value="0.3" />
-            <span class="value-display" id="speedValue">0.30</span>
+            <input type="range" id="speedSlider" min="0.0" max="0.5" step="0.01" value="0.15" />
+            <span class="value-display" id="speedValue">0.15</span>
         </div>
-
-        <!-- Độ sáng / Intensity -->
         <div class="control-group">
             <label>💡 Sáng</label>
-            <input type="range" id="intensitySlider" min="0.2" max="2.5" step="0.01" value="1.0" />
-            <span class="value-display" id="intensityValue">1.00</span>
+            <input type="range" id="intensitySlider" min="0.2" max="3.0" step="0.1" value="1.5" />
+            <span class="value-display" id="intensityValue">1.50</span>
         </div>
     </div>
 
-    <!-- ============================================================ -->
-    <!-- THREE.JS + SHADER                                         -->
-    <!-- ============================================================ -->
     <script type="importmap">
         {
             "imports": {
@@ -228,13 +217,10 @@
     </script>
 
     <script type="module">
-        // ---- IMPORTS ----
         import * as THREE from 'three';
         import { OrbitControls } from 'https://unpkg.com/three@0.160.0/examples/jsm/controls/OrbitControls.js';
 
-        // ---- DOM ----
         const container = document.getElementById('canvas-container');
-        const loadingEl = document.getElementById('loading');
         const fpsEl = document.getElementById('fpsCounter');
 
         const densitySlider = document.getElementById('densitySlider');
@@ -244,15 +230,11 @@
         const intensitySlider = document.getElementById('intensitySlider');
         const intensityValue = document.getElementById('intensityValue');
 
-        // ---- SCENE ----
         const scene = new THREE.Scene();
-
-        // ---- CAMERA ----
         const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
         camera.position.set(3, 2, 5);
         camera.lookAt(0, 0, 0);
 
-        // ---- RENDERER ----
         const renderer = new THREE.WebGLRenderer({
             antialias: true,
             alpha: false,
@@ -263,27 +245,23 @@
         renderer.setClearColor(0x0a0a0f, 1);
         container.appendChild(renderer.domElement);
 
-        // ---- CONTROLS (cho phép kéo xoay) ----
         const controls = new OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
         controls.dampingFactor = 0.06;
-        controls.autoRotate = false;
-        controls.enableZoom = true;
         controls.rotateSpeed = 0.8;
         controls.target.set(0, 0, 0);
         controls.update();
 
-        // ---- SHADER UNIFORMS ----
         const uniforms = {
             uTime: { value: 0 },
             uDensity: { value: parseFloat(densitySlider.value) },
             uSpeed: { value: parseFloat(speedSlider.value) },
             uIntensity: { value: parseFloat(intensitySlider.value) },
             uResolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
-            uMouse: { value: new THREE.Vector2(0.5, 0.5) }
+            uMouse: { value: new THREE.Vector2(0.5, 0.5) },
+            uFrame: { value: 0 }
         };
 
-        // ---- VERTEX SHADER ----
         const vertexShader = `
                     varying vec3 vPosition;
                     varying vec2 vUv;
@@ -295,7 +273,9 @@
                     }
                 `;
 
-        // ---- FRAGMENT SHADER (VOLUME SHADER) ----
+        // ============================================================
+        // SHADER SIÊU NẶNG - NHIỀU OCTAVES + NHIỀU PHÉP TOÁN
+        // ============================================================
         const fragmentShader = `
                     precision highp float;
 
@@ -308,116 +288,187 @@
                     uniform float uIntensity;
                     uniform vec2  uResolution;
                     uniform vec2  uMouse;
+                    uniform float uFrame;
 
-                    // ---- Hàm noise 3D đơn giản ----
+                    // ---- NOISE HÀM NẶNG (nhiều phép toán) ----
                     float hash(vec3 p) {
-                        p = fract(p * 0.3183099 + .1);
+                        p = fract(p * 0.3183099 + 0.1);
                         p *= 17.0;
-                        return fract(p.x * p.y * p.z * (p.x + p.y + p.z));
+                        return fract(p.x * p.y * p.z * (p.x + p.y + p.z + 0.5));
                     }
 
-                    float noise(vec3 p) {
+                    float hash21(vec2 p) {
+                        p = fract(p * vec2(234.34, 435.345));
+                        p += dot(p, p + 19.19);
+                        return fract(p.x * p.y);
+                    }
+
+                    // Noise 3D với nhiều phép toán hơn
+                    float noise3D(vec3 p) {
                         vec3 i = floor(p);
                         vec3 f = fract(p);
                         f = f * f * (3.0 - 2.0 * f);
-                        return mix(
-                            mix(
-                                mix(hash(i + vec3(0,0,0)), hash(i + vec3(1,0,0)), f.x),
-                                mix(hash(i + vec3(0,1,0)), hash(i + vec3(1,1,0)), f.x),
-                                f.y
-                            ),
-                            mix(
-                                mix(hash(i + vec3(0,0,1)), hash(i + vec3(1,0,1)), f.x),
-                                mix(hash(i + vec3(0,1,1)), hash(i + vec3(1,1,1)), f.x),
-                                f.y
-                            ),
-                            f.z
-                        );
+
+                        float a = hash(i + vec3(0.0, 0.0, 0.0));
+                        float b = hash(i + vec3(1.0, 0.0, 0.0));
+                        float c = hash(i + vec3(0.0, 1.0, 0.0));
+                        float d = hash(i + vec3(1.0, 1.0, 0.0));
+                        float e = hash(i + vec3(0.0, 0.0, 1.0));
+                        float f_ = hash(i + vec3(1.0, 0.0, 1.0));
+                        float g = hash(i + vec3(0.0, 1.0, 1.0));
+                        float h = hash(i + vec3(1.0, 1.0, 1.0));
+
+                        float mix1 = mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
+                        float mix2 = mix(mix(e, f_, f.x), mix(g, h, f.x), f.y);
+                        return mix(mix1, mix2, f.z);
                     }
 
-                    // ---- FBM (Fractal Brownian Motion) ----
-                    float fbm(vec3 p, int octaves) {
+                    // Noise 2D cho lớp phụ
+                    float noise2D(vec2 p) {
+                        vec2 i = floor(p);
+                        vec2 f = fract(p);
+                        f = f * f * (3.0 - 2.0 * f);
+                        float a = hash21(i);
+                        float b = hash21(i + vec2(1.0, 0.0));
+                        float c = hash21(i + vec2(0.0, 1.0));
+                        float d = hash21(i + vec2(1.0, 1.0));
+                        return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
+                    }
+
+                    // FBM - 8 OCTAVES (rất nặng)
+                    float fbm8(vec3 p) {
                         float value = 0.0;
                         float amp = 0.5;
                         float freq = 1.0;
-                        for (int i = 0; i < 5; i++) {
-                            if (i >= octaves) break;
-                            value += amp * noise(p * freq);
-                            freq *= 2.0;
-                            amp *= 0.5;
+                        for (int i = 0; i < 8; i++) {
+                            value += amp * noise3D(p * freq);
+                            freq *= 2.1;
+                            amp *= 0.48;
                         }
                         return value;
                     }
 
+                    // FBM thứ 2 với số octaves khác (thêm nặng)
+                    float fbm6(vec3 p) {
+                        float value = 0.0;
+                        float amp = 0.5;
+                        float freq = 0.8;
+                        for (int i = 0; i < 6; i++) {
+                            value += amp * noise3D(p * freq + 1.7);
+                            freq *= 2.3;
+                            amp *= 0.45;
+                        }
+                        return value;
+                    }
+
+                    // Domain Warp (làm méo noise, rất nặng)
+                    float domainWarp(vec3 p) {
+                        vec3 q = vec3(
+                            fbm8(p + vec3(0.0, 0.0, 0.0)),
+                            fbm8(p + vec3(5.2, 1.3, 2.8)),
+                            fbm8(p + vec3(1.7, 9.2, 3.4))
+                        );
+                        vec3 r = vec3(
+                            fbm8(p + 4.0 * q + vec3(1.7, 9.2, 0.0) + 0.15 * uTime),
+                            fbm8(p + 4.0 * q + vec3(8.3, 2.8, 0.0) + 0.12 * uTime),
+                            fbm8(p + 4.0 * q + vec3(3.1, 6.5, 0.0) + 0.10 * uTime)
+                        );
+                        return fbm8(p + 2.0 * r);
+                    }
+
                     void main() {
-                        // Tọa độ UV + thời gian
                         vec2 uv = vUv;
                         float time = uTime * uSpeed;
 
-                        // Tạo 3D position để sample noise
+                        // Tạo 3D position
                         vec3 pos = vec3(uv * 2.0 - 1.0, 0.0);
-                        // Thêm depth dựa trên vị trí z (để có hiệu ứng volume)
                         float depth = vPosition.z * 0.8 + 0.5;
 
-                        // Scale để có nhiều chi tiết
-                        vec3 p = pos * 2.5;
-                        p.z += time * 0.15;
-                        p.x += time * 0.05;
-                        p.y += time * 0.08;
+                        // Scale và xoay
+                        vec3 p = pos * 2.8;
+                        p.z += time * 0.12;
+                        p.x += time * 0.04 + sin(time * 0.1) * 0.1;
+                        p.y += time * 0.06 + cos(time * 0.08) * 0.1;
 
-                        // ---- Lấy noise ----
-                        float n = fbm(p, 5);
+                        // ---- LẤY NHIỀU LỚP NOISE (NẶNG) ----
+                        float n1 = domainWarp(p);
+                        float n2 = fbm8(p * 1.7 + vec3(time * 0.07, time * 0.05, time * 0.03));
+                        float n3 = fbm6(p * 2.3 + vec3(time * 0.09, time * 0.11, time * 0.07));
+                        float n4 = noise3D(p * 4.0 + vec3(time * 0.15, time * 0.12, time * 0.09));
 
-                        // Thêm lớp noise thứ 2 để tạo chi tiết mịn hơn
-                        vec3 p2 = p * 3.0 + vec3(time * 0.1, time * 0.07, time * 0.05);
-                        float n2 = fbm(p2, 3);
-                        n = mix(n, n2, 0.3);
+                        // Kết hợp nhiều lớp
+                        float n = (n1 * 0.6 + n2 * 0.25 + n3 * 0.1 + n4 * 0.05);
 
-                        // Áp dụng độ nặng (density) - làm sắc nét hoặc mờ hơn
+                        // Thêm noise 2D cho chi tiết bề mặt
+                        vec2 p2d = uv * 12.0 + vec2(time * 0.02, time * 0.015);
+                        float n2d = noise2D(p2d);
+                        n = mix(n, n2d, 0.08);
+
+                        // Áp dụng density (nặng hơn với pow)
                         float density = uDensity;
                         float shape = 1.0 - abs(n - 0.5) * 2.0;
-                        shape = pow(shape, density);
+                        shape = pow(shape, density * 1.2);
 
-                        // Thêm hiệu ứng ánh sáng dựa trên vị trí chuột
-                        float mouseInfluence = 0.3 + 0.7 * (1.0 - distance(uv, uMouse) * 1.2);
+                        // Hiệu ứng ánh sáng chuột (nhiều phép toán)
+                        float mouseDist = distance(uv, uMouse);
+                        float mouseInfluence = 0.3 + 0.7 * (1.0 - mouseDist * 1.5);
+                        mouseInfluence = pow(mouseInfluence, 0.8);
                         shape *= mouseInfluence;
 
-                        // Màu sắc gradient dựa trên n và vị trí
-                        vec3 color1 = vec3(0.1, 0.05, 0.25); // tím đậm
-                        vec3 color2 = vec3(0.8, 0.2, 0.6);   // hồng tím
-                        vec3 color3 = vec3(0.1, 0.8, 0.9);   // xanh ngọc
-                        vec3 color4 = vec3(0.9, 0.3, 0.1);   // cam
+                        // Thêm hiệu ứng sóng (nặng)
+                        float wave = sin(uv.x * 30.0 + time * 0.5) * cos(uv.y * 30.0 + time * 0.4) * 0.05;
+                        shape += wave * 0.1;
 
-                        // Mix màu theo noise
-                        float mixVal = n * 1.2 + 0.2;
-                        vec3 col = mix(color1, color2, smoothstep(0.0, 0.5, mixVal));
-                        col = mix(col, color3, smoothstep(0.3, 0.7, mixVal));
-                        col = mix(col, color4, smoothstep(0.6, 1.0, mixVal));
+                        // ---- MÀU SẮC PHỨC TẠP (nhiều phép toán) ----
+                        vec3 color1 = vec3(0.05, 0.02, 0.15);
+                        vec3 color2 = vec3(0.8, 0.1, 0.6);
+                        vec3 color3 = vec3(0.05, 0.7, 0.9);
+                        vec3 color4 = vec3(0.9, 0.2, 0.05);
+                        vec3 color5 = vec3(0.1, 0.9, 0.3);
+                        vec3 color6 = vec3(0.9, 0.8, 0.1);
+
+                        float mixVal = n * 1.5 + 0.2 + sin(time * 0.05) * 0.05;
+                        vec3 col = mix(color1, color2, smoothstep(0.0, 0.3, mixVal));
+                        col = mix(col, color3, smoothstep(0.2, 0.5, mixVal));
+                        col = mix(col, color4, smoothstep(0.4, 0.7, mixVal));
+                        col = mix(col, color5, smoothstep(0.6, 0.85, mixVal));
+                        col = mix(col, color6, smoothstep(0.8, 1.0, mixVal));
 
                         // Thêm độ sáng
                         float intensity = uIntensity;
-                        col *= shape * intensity * 1.2;
+                        col *= shape * intensity * 1.4;
 
-                        // Thêm glow ở trung tâm
+                        // Glow trung tâm (nhiều lớp)
                         float distToCenter = distance(uv, vec2(0.5, 0.5));
-                        float glow = exp(-distToCenter * 2.5) * 0.5;
-                        col += vec3(0.3, 0.1, 0.6) * glow * intensity;
+                        float glow1 = exp(-distToCenter * 2.5) * 0.5;
+                        float glow2 = exp(-distToCenter * 5.0) * 0.3;
+                        float glow3 = exp(-distToCenter * 0.8) * 0.2;
+                        col += vec3(0.3, 0.1, 0.6) * glow1 * intensity;
+                        col += vec3(0.6, 0.2, 0.8) * glow2 * intensity;
+                        col += vec3(0.1, 0.4, 0.8) * glow3 * intensity;
 
-                        // Thêm highlight sáng
-                        float highlight = pow(shape, 4.0) * 0.8;
+                        // Highlight
+                        float highlight = pow(shape, 5.0) * 0.9;
                         col += vec3(1.0, 0.9, 1.0) * highlight * intensity;
 
-                        // Vignette (tối viền)
-                        float vignette = 1.0 - distToCenter * 0.5;
+                        // Thêm hiệu ứng hạt (nặng)
+                        vec2 grainUV = uv * 400.0 + vec2(time * 0.01);
+                        float grain = hash21(grainUV);
+                        col += (grain - 0.5) * 0.03 * intensity;
+
+                        // Vignette
+                        float vignette = 1.0 - distToCenter * 0.6;
                         col *= vignette;
 
-                        // Gamma và xuất
+                        // Thêm nhiễu màu (nặng)
+                        float colorNoise = hash21(uv * 300.0 + time * 0.01);
+                        col += (colorNoise - 0.5) * 0.02;
+
                         col = clamp(col, 0.0, 1.0);
                         gl_FragColor = vec4(col, 1.0);
                     }
                 `;
 
-        // ---- TẠO MATERIAL VÀ MESH ----
         const geometry = new THREE.PlaneGeometry(4, 4);
         const material = new THREE.ShaderMaterial({
             uniforms: uniforms,
@@ -432,10 +483,6 @@
         mesh.position.set(0, 0, 0);
         scene.add(mesh);
 
-        // ---- ẨN LOADING ----
-        loadingEl.style.display = 'none';
-
-        // ---- RESIZE ----
         function onResize() {
             const w = window.innerWidth;
             const h = window.innerHeight;
@@ -446,7 +493,6 @@
         }
         window.addEventListener('resize', onResize);
 
-        // ---- MOUSE TRACKING ----
         const mouse = new THREE.Vector2(0.5, 0.5);
         window.addEventListener('mousemove', (e) => {
             mouse.x = e.clientX / window.innerWidth;
@@ -454,24 +500,29 @@
             uniforms.uMouse.value.set(mouse.x, mouse.y);
         });
 
-        // ---- FPS COUNTER ----
+        window.addEventListener('touchmove', (e) => {
+            if (e.touches.length > 0) {
+                const touch = e.touches[0];
+                mouse.x = touch.clientX / window.innerWidth;
+                mouse.y = 1.0 - (touch.clientY / window.innerHeight);
+                uniforms.uMouse.value.set(mouse.x, mouse.y);
+            }
+        }, { passive: true });
+
         let frameCount = 0;
         let fpsTime = 0;
+        let frame = 0;
 
-        // ---- ANIMATION LOOP ----
         function animate(time) {
             requestAnimationFrame(animate);
+            frame++;
 
-            // Update uniforms
             uniforms.uTime.value = time * 0.001;
+            uniforms.uFrame.value = frame;
 
-            // Update controls
             controls.update();
-
-            // Render
             renderer.render(scene, camera);
 
-            // FPS
             frameCount++;
             if (time - fpsTime >= 1000) {
                 fpsEl.textContent = `${frameCount} FPS`;
@@ -482,7 +533,6 @@
 
         animate(0);
 
-        // ---- UI CONTROLS ----
         densitySlider.addEventListener('input', () => {
             const val = parseFloat(densitySlider.value);
             uniforms.uDensity.value = val;
@@ -501,18 +551,8 @@
             intensityValue.textContent = val.toFixed(2);
         });
 
-        // ---- XỬ LÝ TOUCH CHO MOBILE ----
-        window.addEventListener('touchmove', (e) => {
-            if (e.touches.length > 0) {
-                const touch = e.touches[0];
-                mouse.x = touch.clientX / window.innerWidth;
-                mouse.y = 1.0 - (touch.clientY / window.innerHeight);
-                uniforms.uMouse.value.set(mouse.x, mouse.y);
-            }
-        }, { passive: true });
-
-        console.log('🌀 Volume Shader đã khởi động!');
-        console.log('💡 Điều chỉnh thanh trượt để thay đổi hiệu ứng.');
+        console.log('🔥 Volume Shader NẶNG đã khởi động!');
+        console.log('💀 Chuẩn bị tinh thần lag nhé!');
     </script>
 
 </body>
